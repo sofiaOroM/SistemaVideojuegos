@@ -6,8 +6,8 @@ package controllers;
 
 import dto.EmpresaDTO;
 import java.io.IOException;
-import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,70 +19,13 @@ import service.EmpresaService;
  *
  * @author sofia
  */
-@WebServlet("/api/empresas")
+@WebServlet("/api/empresas/*")
+@MultipartConfig(maxFileSize = 1024*1024*5)
 public class EmpresaServlet extends HttpServlet {
 
     private final EmpresaService service = new EmpresaService();
-    
-    @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) 
-            throws IOException, ServletException {
-        setResponseHeaders(resp);
 
-        try {
-            String nombre = req.getParameter("nombre");
-            String descripcion = req.getParameter("descripcion");
-
-            if(nombre == null || nombre.isEmpty())
-                throw new Exception("Nombre obligatorio");
-
-            Part logoPart = req.getPart("logo");
-            byte[] logo = null;
-            if(logoPart != null && logoPart.getSize() > 0){
-                logo = logoPart.getInputStream().readAllBytes();
-            }
-
-            EmpresaDTO e = new EmpresaDTO();
-            e.setNombreEmpresa(nombre);
-            e.setDescripcion(descripcion);
-            e.setLogo(logo);
-
-            service.crear(e);
-
-            resp.getWriter().write("{\"message\":\"Empresa creada\"}");
-
-        } catch (Exception ex) {
-            sendError(resp, 400, ex.getMessage());
-        }
-    }
-
-    protected void doPut(HttpServletRequest req, HttpServletResponse resp)
-            throws IOException {
-
-        EmpresaDTO empresa = new EmpresaDTO();
-        empresa.setIdEmpresa(Integer.parseInt(req.getParameter("id")));
-        empresa.setNombreEmpresa(req.getParameter("nombre"));
-
-        try {
-            service.actualizar(empresa);
-            resp.setStatus(200);
-        } catch (Exception ex) {
-            resp.sendError(400);
-        }
-    }
-
-    protected void doDelete(HttpServletRequest req, HttpServletResponse resp)
-            throws IOException {
-
-        try {
-            service.eliminar(Integer.parseInt(req.getParameter("id")));
-            resp.setStatus(204);
-        } catch (Exception e) {
-            resp.sendError(400);
-        }
-    }
-
-    protected void setResponseHeaders(HttpServletResponse resp) {
+    private void setResponseHeaders(HttpServletResponse resp) {
         resp.setContentType("application/json");
         resp.setCharacterEncoding("UTF-8");
         resp.setHeader("Access-Control-Allow-Origin", "http://localhost:4200");
@@ -90,8 +33,97 @@ public class EmpresaServlet extends HttpServlet {
         resp.setHeader("Access-Control-Allow-Headers", "Content-Type");
     }
 
-    protected void sendError(HttpServletResponse resp, int status, String message) throws IOException {
-        resp.setStatus(status);
-        resp.getWriter().write("{\"error\":\"" + message + "\"}");
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
+        setResponseHeaders(resp);
+        try {
+            String nombre = req.getParameter("nombre");
+            String descripcion = req.getParameter("descripcion");
+
+            Part logoPart = req.getPart("logo");
+            byte[] logo = null;
+            if(logoPart != null && logoPart.getSize() > 0)
+                logo = logoPart.getInputStream().readAllBytes();
+
+            EmpresaDTO e = new EmpresaDTO();
+            e.setNombreEmpresa(nombre);
+            e.setDescripcion(descripcion);
+            e.setLogo(logo);
+
+            int id = service.crear(e);
+            resp.getWriter().write("{\"message\":\"Empresa creada\",\"id\":"+id+"}");
+        } catch(Exception ex){
+            resp.setStatus(400);
+            resp.getWriter().write("{\"error\":\""+ex.getMessage()+"\"}");
+        }
+    }
+
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        setResponseHeaders(resp);
+        try {
+            String path = req.getPathInfo();
+            if(path != null && path.length() > 1){
+                int id = Integer.parseInt(path.substring(1));
+                EmpresaDTO e = service.obtener(id);
+                if(e == null){
+                    resp.setStatus(404);
+                    resp.getWriter().write("{\"error\":\"Empresa no encontrada\"}");
+                    return;
+                }
+                resp.getWriter().write(new JSONObject(e).toString());
+            } else {
+                List<EmpresaDTO> lista = service.obtenerTodos();
+                JSONArray arr = new JSONArray(lista);
+                resp.getWriter().write(arr.toString());
+            }
+        } catch(Exception ex){
+            resp.setStatus(400);
+            resp.getWriter().write("{\"error\":\""+ex.getMessage()+"\"}");
+        }
+    }
+
+    @Override
+    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
+        setResponseHeaders(resp);
+        try {
+            String path = req.getPathInfo();
+            if(path == null || path.length() <= 1) throw new Exception("ID obligatorio en la URL");
+            int id = Integer.parseInt(path.substring(1));
+
+            String nombre = req.getParameter("nombre");
+            String descripcion = req.getParameter("descripcion");
+            Part logoPart = req.getPart("logo");
+            byte[] logo = null;
+            if(logoPart != null && logoPart.getSize() > 0)
+                logo = logoPart.getInputStream().readAllBytes();
+
+            EmpresaDTO e = new EmpresaDTO();
+            e.setIdEmpresa(id);
+            e.setNombreEmpresa(nombre);
+            e.setDescripcion(descripcion);
+            e.setLogo(logo);
+
+            service.actualizar(e);
+            resp.getWriter().write("{\"message\":\"Empresa actualizada\"}");
+        } catch(Exception ex){
+            resp.setStatus(400);
+            resp.getWriter().write("{\"error\":\""+ex.getMessage()+"\"}");
+        }
+    }
+
+    @Override
+    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        setResponseHeaders(resp);
+        try {
+            String path = req.getPathInfo();
+            if(path == null || path.length() <= 1) throw new Exception("ID obligatorio en la URL");
+            int id = Integer.parseInt(path.substring(1));
+            service.eliminar(id);
+            resp.getWriter().write("{\"message\":\"Empresa eliminada\"}");
+        } catch(Exception ex){
+            resp.setStatus(400);
+            resp.getWriter().write("{\"error\":\""+ex.getMessage()+"\"}");
+        }
     }
 }

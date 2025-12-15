@@ -4,9 +4,8 @@
  */
 package service;
 
-import com.videojuegosbackend.conexionDB.ConnectionManager;
 import dto.EmpresaDTO;
-import java.sql.Connection;
+import java.util.List;
 import models.EmpresaModel;
 
 /**
@@ -15,26 +14,31 @@ import models.EmpresaModel;
  */
 public class EmpresaService {
 
-    private final EmpresaModel empresa = new EmpresaModel();
+    private final EmpresaModel model = new EmpresaModel();
 
-    public void crear(EmpresaDTO empresaDto) throws Exception {
-        if (empresaDto.getNombreEmpresa() == null || empresaDto.getNombreEmpresa().isEmpty()) {
+    public int crear(EmpresaDTO e) throws Exception {
+        if (e.getNombreEmpresa() == null || e.getNombreEmpresa().isEmpty()) {
             throw new Exception("Nombre obligatorio");
         }
-        empresa.insertarEmpresa(empresaDto);
+        return model.insertar(e);
     }
 
-    public void actualizar(EmpresaDTO empresaDto) throws Exception {
-        ConnectionManager cm = new ConnectionManager();
-        Connection conn = cm.conectar();
-        empresa.actualizarEmpresa(empresaDto, conn);
-        cm.desconectar(conn);
+    public EmpresaDTO obtener(int id) throws Exception {
+        return model.obtenerPorId(id);
     }
 
-    public void eliminar(int idEmpresa) throws Exception {
-        ConnectionManager cm = new ConnectionManager();
-        Connection conn = cm.conectar();
-        empresa.eliminarEmpresa(idEmpresa, conn);
-        cm.desconectar(conn);
+    public List<EmpresaDTO> obtenerTodos() throws Exception {
+        return model.obtenerTodos();
+    }
+
+    public void actualizar(EmpresaDTO e) throws Exception {
+        if (e.getNombreEmpresa() == null || e.getNombreEmpresa().isEmpty()) {
+            throw new Exception("Nombre obligatorio");
+        }
+        model.actualizar(e);
+    }
+
+    public void eliminar(int id) throws Exception {
+        model.eliminar(id);
     }
 }
