@@ -12,6 +12,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Part;
 import service.EmpresaService;
 
 /**
@@ -22,19 +23,36 @@ import service.EmpresaService;
 public class EmpresaServlet extends HttpServlet {
 
     private final EmpresaService service = new EmpresaService();
-
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp)
-            throws IOException {
-
-        EmpresaDTO empresa = new EmpresaDTO();
-        empresa.setNombreEmpresa(req.getParameter("nombre"));
-        empresa.setDescripcion(req.getParameter("descripcion"));
+    
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) 
+            throws IOException, ServletException {
+        setResponseHeaders(resp);
 
         try {
-            service.crear(empresa);
-            resp.setStatus(201);
+            String nombre = req.getParameter("nombre");
+            String descripcion = req.getParameter("descripcion");
+
+            if(nombre == null || nombre.isEmpty())
+                throw new Exception("Nombre obligatorio");
+
+            Part logoPart = req.getPart("logo");
+            byte[] logo = null;
+            if(logoPart != null && logoPart.getSize() > 0){
+                logo = logoPart.getInputStream().readAllBytes();
+            }
+
+            EmpresaDTO e = new EmpresaDTO();
+            e.setNombreEmpresa(nombre);
+            e.setDescripcion(descripcion);
+            e.setLogo(logo);
+
+            service.crear(e);
+
+            resp.getWriter().write("{\"message\":\"Empresa creada\"}");
+
         } catch (Exception ex) {
-            resp.sendError(400);
+            sendError(resp, 400, ex.getMessage());
         }
     }
 
@@ -62,5 +80,18 @@ public class EmpresaServlet extends HttpServlet {
         } catch (Exception e) {
             resp.sendError(400);
         }
+    }
+
+    protected void setResponseHeaders(HttpServletResponse resp) {
+        resp.setContentType("application/json");
+        resp.setCharacterEncoding("UTF-8");
+        resp.setHeader("Access-Control-Allow-Origin", "http://localhost:4200");
+        resp.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE, OPTIONS");
+        resp.setHeader("Access-Control-Allow-Headers", "Content-Type");
+    }
+
+    protected void sendError(HttpServletResponse resp, int status, String message) throws IOException {
+        resp.setStatus(status);
+        resp.getWriter().write("{\"error\":\"" + message + "\"}");
     }
 }

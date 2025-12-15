@@ -13,16 +13,15 @@ import models.EmpresaModel;
  *
  * @author sofia
  */
-
 public class EmpresaService {
 
     private final EmpresaModel empresa = new EmpresaModel();
 
     public void crear(EmpresaDTO empresaDto) throws Exception {
-        ConnectionManager cm = new ConnectionManager();
-        Connection conn = cm.conectar();
-        empresa.insertarEmpresa(empresaDto, conn);
-        cm.desconectar(conn);
+        if (empresaDto.getNombreEmpresa() == null || empresaDto.getNombreEmpresa().isEmpty()) {
+            throw new Exception("Nombre obligatorio");
+        }
+        empresa.insertarEmpresa(empresaDto);
     }
 
     public void actualizar(EmpresaDTO empresaDto) throws Exception {

@@ -4,9 +4,11 @@
  */
 package models;
 
+import com.videojuegosbackend.conexionDB.ConnectionManager;
 import dto.EmpresaDTO;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.Types;
 
 /**
  *
@@ -14,12 +16,21 @@ import java.sql.PreparedStatement;
  */
 public class EmpresaModel {
 
-    public void insertarEmpresa(EmpresaDTO e, Connection conn) throws Exception {
-        String sql = "INSERT INTO empresa (Nombre_empresa, Descripcion) VALUES (?,?)";
-        PreparedStatement ps = conn.prepareStatement(sql);
-        ps.setString(1, e.getNombreEmpresa());
-        ps.setString(2, e.getDescripcion());
-        ps.executeUpdate();
+    public void insertarEmpresa(EmpresaDTO e) throws Exception {
+        String sql = "INSERT INTO empresa(nombre_empresa, descripcion, logo) VALUES (?,?,?)";
+        Connection conn = new ConnectionManager().conectar();
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, e.getNombreEmpresa());
+            ps.setString(2, e.getDescripcion());
+            if (e.getLogo() != null) {
+                ps.setBytes(3, e.getLogo());
+            } else {
+                ps.setNull(3, Types.BLOB);
+            }
+            ps.executeUpdate();
+        } finally {
+            conn.close();
+        }
     }
 
     public void actualizarEmpresa(EmpresaDTO e, Connection conn) throws Exception {
