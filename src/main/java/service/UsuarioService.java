@@ -8,7 +8,6 @@ import com.videojuegosbackend.conexionDB.ConnectionManager;
 import dto.UsuarioDTO;
 import java.sql.Connection;
 import java.util.List;
-import models.CarteraModel;
 import models.UsuarioModel;
 import util.PasswordUtil;
 
@@ -20,25 +19,36 @@ public class UsuarioService {
 
     private final UsuarioModel model = new UsuarioModel();
 
+    private final CarteraService carteraService = new CarteraService();
+
     public int crearUsuario(UsuarioDTO u) throws Exception {
-        if (u.getCorreoElectronico() == null || u.getCorreoElectronico().isEmpty()) {
+        if(u.getCorreoElectronico() == null || u.getCorreoElectronico().isEmpty())
             throw new Exception("Correo obligatorio");
-        }
-        if (u.getPassword() == null || u.getPassword().isEmpty()) {
+        if(u.getPassword() == null || u.getPassword().isEmpty())
             throw new Exception("Password obligatorio");
-        }
-        if (u.getRol() == null || u.getRol().isEmpty()) {
+        if(u.getRol() == null || u.getRol().isEmpty())
             throw new Exception("Rol obligatorio");
-        }
 
+        // Encriptar password
         u.setPassword(PasswordUtil.encriptar(u.getPassword()));
-        int id = model.insertar(u);
 
-        // Si es gamer, crear cartera automáticamente
-        if ("gamer".equals(u.getRol())) {
-            new CarteraService().crearCartera(u);
+        ConnectionManager cm = new ConnectionManager();
+        try(Connection conn = cm.conectar()){
+            conn.setAutoCommit(false);
+
+            // Insertar usuario
+            int idUsuario = model.insertar(u, conn);
+
+            // Crear cartera si es gamer
+            if("gamer".equalsIgnoreCase(u.getRol())){
+                carteraService.crearCartera(idUsuario, conn);
+            }
+
+            conn.commit();
+            return idUsuario;
+        } catch(Exception e){
+            throw e;
         }
-        return id;
     }
 
     public UsuarioDTO obtenerUsuario(int id) throws Exception {

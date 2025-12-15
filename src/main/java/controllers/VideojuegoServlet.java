@@ -61,7 +61,7 @@ public class VideojuegoServlet extends HttpServlet {
             String[] catIds = req.getParameterValues("categorias");
             if(catIds != null){
                 List<Integer> categorias = new ArrayList<>();
-                for(String c : catIds) categorias.add(Integer.parseInt(c));
+                for(String c : catIds) categorias.add(Integer.valueOf(c));
                 v.setCategorias(categorias);
             }
 
@@ -124,7 +124,7 @@ public class VideojuegoServlet extends HttpServlet {
             String[] catIds = req.getParameterValues("categorias");
             if(catIds != null){
                 List<Integer> categorias = new ArrayList<>();
-                for(String c : catIds) categorias.add(Integer.parseInt(c));
+                for(String c : catIds) categorias.add(Integer.valueOf(c));
                 v.setCategorias(categorias);
             }
 

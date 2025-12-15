@@ -21,10 +21,14 @@ import java.util.List;
  */
 public class UsuarioModel {
 
-    public int insertar(UsuarioDTO u) throws Exception {
-        String sql = "INSERT INTO usuario (Nombre_usuario, Correo_electronico, Fecha_nacimiento, Password,"
-                + "Nickname, Telefono, Pais, Rol, Id_empresa, Avatar) VALUES (?,?,?,?,?,?,?,?,?,?)";
-        Connection conn = new ConnectionManager().conectar();
+    public int insertar(UsuarioDTO u, Connection conn) throws Exception {
+        String sql = "INSERT INTO usuario "
+                + "(Nombre_usuario, Correo_electronico, Fecha_nacimiento, Password, "
+                + "Nickname, Telefono, Pais, Rol, Id_empresa, Avatar) "
+                + "VALUES (?,?,?,?,?,?,?,?,?,?)";
+
+        int idUsuario = 0;
+
         try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, u.getNombreUsuario());
             ps.setString(2, u.getCorreoElectronico());
@@ -39,18 +43,23 @@ public class UsuarioModel {
             } else {
                 ps.setNull(9, Types.INTEGER);
             }
+
             if (u.getAvatar() != null) {
                 ps.setBytes(10, u.getAvatar());
             } else {
                 ps.setNull(10, Types.BLOB);
             }
+
             ps.executeUpdate();
+
             ResultSet rs = ps.getGeneratedKeys();
-            rs.next();
-            return rs.getInt(1);
-        } finally {
-            conn.close();
+            if (rs.next()) {
+                idUsuario = rs.getInt(1);
+                u.setIdUsuario(idUsuario);
+            }
         }
+
+        return idUsuario;
     }
 
     public UsuarioDTO obtenerPorId(int id) throws Exception {

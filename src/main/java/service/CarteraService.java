@@ -4,8 +4,7 @@
  */
 package service;
 
-import com.videojuegosbackend.conexionDB.ConnectionManager;
-import dto.UsuarioDTO;
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 
@@ -15,12 +14,13 @@ import java.sql.PreparedStatement;
  */
 public class CarteraService {
 
-    public void crearCartera(UsuarioDTO u) throws Exception {
-        String sql = "INSERT INTO cartera(id_usuario, saldo) VALUES (?, 0)";
-        Connection conn = new ConnectionManager().conectar();
+        public void crearCartera(int idUsuario, Connection conn) throws Exception {
+        String sql = "INSERT INTO cartera (id_usuario, saldo) VALUES (?, ?)";
+
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, u.getIdUsuario());
+            ps.setInt(1, idUsuario);
+            ps.setBigDecimal(2, new BigDecimal("0.00"));
             ps.executeUpdate();
-        } finally { conn.close(); }
+        }
     }
 }
