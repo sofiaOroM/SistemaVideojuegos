@@ -15,6 +15,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Part;
 import java.sql.Date;
 import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import service.UsuarioService;
 
 /**
