@@ -17,7 +17,7 @@ import service.UsuarioService;
  *
  * @author sofia
  */
-@WebServlet("/api/usuarios")
+@WebServlet("/usuarios")
 public class UsuarioServlet extends HttpServlet {
 
     private final UsuarioService service = new UsuarioService();
