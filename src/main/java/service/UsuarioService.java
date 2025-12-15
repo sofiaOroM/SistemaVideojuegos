@@ -7,6 +7,7 @@ package service;
 import com.videojuegosbackend.conexionDB.ConnectionManager;
 import dto.UsuarioDTO;
 import java.sql.Connection;
+import java.util.List;
 import models.CarteraModel;
 import models.UsuarioModel;
 import util.PasswordUtil;
@@ -17,55 +18,45 @@ import util.PasswordUtil;
  */
 public class UsuarioService {
 
-    private final UsuarioModel usuario = new UsuarioModel();
-    private final CarteraModel cartera = new CarteraModel();
+    private final UsuarioModel model = new UsuarioModel();
 
-    public void crearGamer(UsuarioDTO u) throws Exception {
-
-        ConnectionManager cm = new ConnectionManager();
-        Connection conn = cm.conectar();
-
-        try {
-            conn.setAutoCommit(false);
-
-            u.setRol("gamer");
-            u.setPassword(PasswordUtil.encriptar(u.getPassword()));
-
-            int idUsuario = usuario.insertarUsuario(conn, u);
-            cartera.crearCartera(conn, idUsuario);
-
-            conn.commit();
-
-        } catch (Exception e) {
-            conn.rollback();
-            throw e;
-        } finally {
-            cm.desconectar(conn);
+    public int crearUsuario(UsuarioDTO u) throws Exception {
+        if (u.getCorreoElectronico() == null || u.getCorreoElectronico().isEmpty()) {
+            throw new Exception("Correo obligatorio");
         }
+        if (u.getPassword() == null || u.getPassword().isEmpty()) {
+            throw new Exception("Password obligatorio");
+        }
+        if (u.getRol() == null || u.getRol().isEmpty()) {
+            throw new Exception("Rol obligatorio");
+        }
+
+        u.setPassword(PasswordUtil.encriptar(u.getPassword()));
+        int id = model.insertar(u);
+
+        // Si es gamer, crear cartera automáticamente
+        if ("gamer".equals(u.getRol())) {
+            new CarteraService().crearCartera(u);
+        }
+        return id;
+    }
+
+    public UsuarioDTO obtenerUsuario(int id) throws Exception {
+        return model.obtenerPorId(id);
+    }
+
+    public List<UsuarioDTO> obtenerTodos() throws Exception {
+        return model.obtenerTodos();
     }
 
     public void actualizarUsuario(UsuarioDTO u) throws Exception {
-        ConnectionManager cm = new ConnectionManager();
-        Connection conn = cm.conectar();
-        usuario.actualizarUsuario(conn, u);
-        cm.desconectar(conn);
+        if (u.getPassword() != null && !u.getPassword().isEmpty()) {
+            u.setPassword(PasswordUtil.encriptar(u.getPassword()));
+        }
+        model.actualizar(u);
     }
 
-    public void eliminarUsuario(int idUsuario) throws Exception {
-
-        ConnectionManager cm = new ConnectionManager();
-        Connection conn = cm.conectar();
-
-        try {
-            conn.setAutoCommit(false);
-            cartera.eliminarPorUsuario(conn, idUsuario);
-            usuario.eliminarUsuario(conn, idUsuario);
-            conn.commit();
-        } catch (Exception e) {
-            conn.rollback();
-            throw e;
-        } finally {
-            cm.desconectar(conn);
-        }
+    public void eliminarUsuario(int id) throws Exception {
+        model.eliminar(id);
     }
 }

@@ -21,6 +21,7 @@ public class UsuarioDTO {
     private String pais;
     private String rol;
     private Integer idEmpresa;
+    private byte[] avatar;
 
     public UsuarioDTO(){
         
@@ -103,6 +104,14 @@ public class UsuarioDTO {
 
     public void setIdEmpresa(Integer idEmpresa) {
         this.idEmpresa = idEmpresa;
+    }
+
+    public byte[] getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(byte[] avatar) {
+        this.avatar = avatar;
     }
     
     
