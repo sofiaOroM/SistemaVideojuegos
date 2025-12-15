@@ -4,9 +4,8 @@
  */
 package service;
 
-import com.videojuegosbackend.conexionDB.ConnectionManager;
 import dto.CategoriaDTO;
-import java.sql.Connection;
+import java.util.List;
 import models.CategoriaModel;
 
 /**
@@ -17,33 +16,29 @@ public class CategoriaService {
 
     private final CategoriaModel categoria = new CategoriaModel();
 
-    public void crear(CategoriaDTO c) throws Exception {
-
-        if (c.getNombreCategoria() == null || c.getNombreCategoria().isBlank()) {
-            throw new Exception("Nombre de categoría obligatorio");
+    public int crear(CategoriaDTO c) throws Exception {
+        if (c.getNombreCategoria() == null || c.getNombreCategoria().isEmpty()) {
+            throw new Exception("Nombre obligatorio");
         }
+        return categoria.insertar(c);
+    }
 
-        ConnectionManager cm = new ConnectionManager();
-        Connection conn = cm.conectar();
-        categoria.insertarCategoria(c, conn);
-        cm.desconectar(conn);
+    public CategoriaDTO obtener(int id) throws Exception {
+        return categoria.obtenerPorId(id);
+    }
+
+    public List<CategoriaDTO> obtenerTodos() throws Exception {
+        return categoria.obtenerTodos();
     }
 
     public void actualizar(CategoriaDTO c) throws Exception {
-        if (c.getIdCategoria() <= 0) {
-            throw new Exception("ID inválido");
+        if (c.getNombreCategoria() == null || c.getNombreCategoria().isEmpty()) {
+            throw new Exception("Nombre obligatorio");
         }
-        crear(c);
+        categoria.actualizar(c);
     }
 
     public void eliminar(int id) throws Exception {
-        if (id <= 0) {
-            throw new Exception("ID inválido");
-        }
-
-        ConnectionManager cm = new ConnectionManager();
-        Connection conn = cm.conectar();
-        categoria.eliminarCategoria(id, conn);
-        cm.desconectar(conn);
+        categoria.eliminar(id);
     }
 }

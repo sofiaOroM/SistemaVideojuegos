@@ -4,12 +4,8 @@
  */
 package service;
 
-import com.videojuegosbackend.conexionDB.ConnectionManager;
 import dto.VideojuegoDTO;
-import java.math.BigDecimal;
-import java.sql.Connection;
 import java.util.List;
-import models.VideojuegoCategoriaModel;
 import models.VideojuegoModel;
 
 /**
@@ -19,99 +15,36 @@ import models.VideojuegoModel;
 public class VideojuegoService {
 
     private final VideojuegoModel videojuego = new VideojuegoModel();
-    private final VideojuegoCategoriaModel categoria = new VideojuegoCategoriaModel();
 
-    public void crearVideojuego(VideojuegoDTO v, List<Integer> categorias, byte[] imagen)
-            throws Exception {
-
-        validar(v);
-
-        ConnectionManager cm = new ConnectionManager();
-        Connection conn = cm.conectar();
-
-        try {
-            conn.setAutoCommit(false);
-
-            int idVideojuego = videojuego.insertarYRetornarId(v, conn);
-
-            if (imagen != null) {
-                videojuego.actualizarImagen(conn, idVideojuego, imagen);
-            }
-
-            categoria.insertarCategorias(conn, idVideojuego, categorias);
-
-            conn.commit();
-
-        } catch (Exception e) {
-            conn.rollback();
-            throw e;
-        } finally {
-            cm.desconectar(conn);
+    public int crear(VideojuegoDTO v) throws Exception {
+        if (v.getTitulo() == null || v.getTitulo().isEmpty()) {
+            throw new Exception("Título obligatorio");
         }
+        if (v.getImagenPrincipal() == null) {
+            throw new Exception("Imagen principal obligatoria");
+        }
+        return videojuego.insertar(v);
     }
 
-    public void actualizarVideojuego(VideojuegoDTO v, List<Integer> categorias, byte[] imagen)
-            throws Exception {
-
-        if (v.getIdVideojuego() <= 0)
-            throw new Exception("ID de videojuego inválido");
-
-        validar(v);
-
-        ConnectionManager cm = new ConnectionManager();
-        Connection conn = cm.conectar();
-
-        try {
-            conn.setAutoCommit(false);
-
-            videojuego.actualizarVideojuego(v, conn);
-            categoria.eliminarPorVideojuego(conn, v.getIdVideojuego());
-            categoria.insertarCategorias(conn, v.getIdVideojuego(), categorias);
-
-            if (imagen != null) {
-                videojuego.actualizarImagen(conn, v.getIdVideojuego(), imagen);
-            }
-
-            conn.commit();
-
-        } catch (Exception e) {
-            conn.rollback();
-            throw e;
-        } finally {
-            cm.desconectar(conn);
-        }
+    public VideojuegoDTO obtener(int id) throws Exception {
+        return videojuego.obtenerPorId(id);
     }
 
-    public void eliminarVideojuego(int idVideojuego) throws Exception {
-
-        ConnectionManager cm = new ConnectionManager();
-        Connection conn = cm.conectar();
-
-        try {
-            conn.setAutoCommit(false);
-            categoria.eliminarPorVideojuego(conn, idVideojuego);
-            videojuego.eliminarVideojuego(idVideojuego, conn);
-            conn.commit();
-        } catch (Exception e) {
-            conn.rollback();
-            throw e;
-        } finally {
-            cm.desconectar(conn);
-        }
+    public List<VideojuegoDTO> obtenerTodos() throws Exception {
+        return videojuego.obtenerTodos();
     }
 
-    private void validar(VideojuegoDTO v) throws Exception {
+    public void actualizar(VideojuegoDTO v) throws Exception {
+        if (v.getTitulo() == null || v.getTitulo().isEmpty()) {
+            throw new Exception("Título obligatorio");
+        }
+        if (v.getImagenPrincipal() == null) {
+            throw new Exception("Imagen principal obligatoria");
+        }
+        videojuego.actualizar(v);
+    }
 
-        if (v.getTitulo() == null || v.getTitulo().length() < 3)
-            throw new Exception("Título inválido");
-
-        if (v.getPrecio() == null || v.getPrecio().compareTo(BigDecimal.ZERO) < 0)
-            throw new Exception("Precio inválido");
-
-        if (!List.of("E","T","M").contains(v.getClasificacion()))
-            throw new Exception("Clasificación inválida");
-
-        if (v.getIdEmpresa() <= 0)
-            throw new Exception("Empresa obligatoria");
+    public void eliminar(int id) throws Exception {
+        videojuego.eliminar(id);
     }
 }

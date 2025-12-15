@@ -6,6 +6,7 @@ package dto;
 
 import java.math.BigDecimal;
 import java.sql.Date;
+import java.util.List;
 
 /**
  *
@@ -23,7 +24,8 @@ public class VideojuegoDTO {
     private Date fechaLanzamiento;
     private boolean activo;
     private int idEmpresa;
-
+    private List<Integer> categorias;
+    
     public VideojuegoDTO() {
     }
 
@@ -105,6 +107,14 @@ public class VideojuegoDTO {
 
     public void setIdEmpresa(int idEmpresa) {
         this.idEmpresa = idEmpresa;
+    }
+
+    public List<Integer> getCategorias() {
+        return categorias;
+    }
+
+    public void setCategorias(List<Integer> categorias) {
+        this.categorias = categorias;
     }
     
 }
