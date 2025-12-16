@@ -34,7 +34,7 @@ public class CompraModel {
                 ps.setDate(3, c.getFechaCompra());
                 ps.setBigDecimal(4, precioPagado);
                 ps.executeUpdate();
-                
+
                 ResultSet rs = ps.getGeneratedKeys();
                 rs.next();
                 int idCompra = rs.getInt(1);
@@ -46,6 +46,27 @@ public class CompraModel {
             }
         } finally {
             conn.setAutoCommit(true);
+            conn.close();
+        }
+    }
+
+    public CompraDTO obtenerPorId(int id) throws Exception {
+        String sql = "SELECT * FROM compras WHERE Id_compra=?";
+        Connection conn = new ConnectionManager().conectar();
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                CompraDTO c = new CompraDTO();
+                c.setIdUsuario(rs.getInt("id_usuario"));
+                c.setIdVideojuego(rs.getInt("id_videojuego"));
+                c.setFechaCompra(rs.getDate("fecha_compra"));
+                c.setPrecioPagado(rs.getInt("precio_pagado"));
+
+                return c;
+            }
+            return null;
+        } finally {
             conn.close();
         }
     }

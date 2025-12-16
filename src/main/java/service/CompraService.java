@@ -18,4 +18,9 @@ public class CompraService {
     public int crear(CompraDTO c) throws Exception {
         return compra.insertar(c);
     }
+
+    public CompraDTO obtener(int id) throws Exception {
+        return compra.obtenerPorId(id);
+    }
+
 }
