@@ -5,6 +5,7 @@
 package service;
 
 import dto.CompraDTO;
+import java.util.List;
 import models.CompraModel;
 
 /**
@@ -21,6 +22,10 @@ public class CompraService {
 
     public CompraDTO obtener(int id) throws Exception {
         return compra.obtenerPorId(id);
+    }
+
+    public List<CompraDTO> obtenerTodos() throws Exception {
+        return compra.obtenerTodos();
     }
 
 }

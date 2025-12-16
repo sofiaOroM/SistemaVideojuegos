@@ -11,6 +11,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -58,6 +60,7 @@ public class CompraModel {
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 CompraDTO c = new CompraDTO();
+                c.setIdCompra(rs.getInt("id_compra"));
                 c.setIdUsuario(rs.getInt("id_usuario"));
                 c.setIdVideojuego(rs.getInt("id_videojuego"));
                 c.setFechaCompra(rs.getDate("fecha_compra"));
@@ -66,6 +69,27 @@ public class CompraModel {
                 return c;
             }
             return null;
+        } finally {
+            conn.close();
+        }
+    }
+
+    public List<CompraDTO> obtenerTodos() throws Exception {
+        String sql = "SELECT * FROM compras";
+        Connection conn = new ConnectionManager().conectar();
+        List<CompraDTO> lista = new ArrayList<>();
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                CompraDTO c = new CompraDTO();
+                c.setIdCompra(rs.getInt("id_compra"));
+                c.setIdUsuario(rs.getInt("id_usuario"));
+                c.setIdVideojuego(rs.getInt("id_videojuego"));
+                c.setFechaCompra(rs.getDate("fecha_compra"));
+                c.setPrecioPagado(rs.getInt("precio_pagado"));
+                lista.add(c);
+            }
+            return lista;
         } finally {
             conn.close();
         }
