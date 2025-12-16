@@ -23,7 +23,7 @@ import service.EmpresaService;
  * @author sofia
  */
 @WebServlet("/api/empresas/*")
-@MultipartConfig(maxFileSize = 1024*1024*5)
+@MultipartConfig(maxFileSize = 1024 * 1024 * 5)
 public class EmpresaServlet extends HttpServlet {
 
     private final EmpresaService service = new EmpresaService();
@@ -37,16 +37,18 @@ public class EmpresaServlet extends HttpServlet {
     }
 
     @Override
+    //http://localhost:8080/VideojuegosBackend/api/empresas/parametros
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
         setResponseHeaders(resp);
         try {
-            String nombre = req.getParameter("nombre");
+            String nombre = req.getParameter("nombreEmpresa");
             String descripcion = req.getParameter("descripcion");
 
             Part logoPart = req.getPart("logo");
             byte[] logo = null;
-            if(logoPart != null && logoPart.getSize() > 0)
+            if (logoPart != null && logoPart.getSize() > 0) {
                 logo = logoPart.getInputStream().readAllBytes();
+            }
 
             EmpresaDTO e = new EmpresaDTO();
             e.setNombreEmpresa(nombre);
@@ -54,22 +56,24 @@ public class EmpresaServlet extends HttpServlet {
             e.setLogo(logo);
 
             int id = service.crear(e);
-            resp.getWriter().write("{\"message\":\"Empresa creada\",\"id\":"+id+"}");
-        } catch(Exception ex){
+            resp.getWriter().write("{\"message\":\"Empresa creada\",\"id\":" + id + "}");
+        } catch (Exception ex) {
             resp.setStatus(400);
-            resp.getWriter().write("{\"error\":\""+ex.getMessage()+"\"}");
+            resp.getWriter().write("{\"error\":\"" + ex.getMessage() + "\"}");
         }
     }
 
     @Override
+    //http://localhost:8080/VideojuegosBackend/api/empresas listado de todas
+    //http://localhost:8080/VideojuegosBackend/api/empresas/id una empresa en especifico   
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         setResponseHeaders(resp);
         try {
             String path = req.getPathInfo();
-            if(path != null && path.length() > 1){
+            if (path != null && path.length() > 1) {
                 int id = Integer.parseInt(path.substring(1));
                 EmpresaDTO e = service.obtener(id);
-                if(e == null){
+                if (e == null) {
                     resp.setStatus(404);
                     resp.getWriter().write("{\"error\":\"Empresa no encontrada\"}");
                     return;
@@ -80,26 +84,30 @@ public class EmpresaServlet extends HttpServlet {
                 JSONArray arr = new JSONArray(lista);
                 resp.getWriter().write(arr.toString());
             }
-        } catch(Exception ex){
+        } catch (Exception ex) {
             resp.setStatus(400);
-            resp.getWriter().write("{\"error\":\""+ex.getMessage()+"\"}");
+            resp.getWriter().write("{\"error\":\"" + ex.getMessage() + "\"}");
         }
     }
 
     @Override
+    //http://localhost:8080/VideojuegosBackend/api/empresas/id?parametros
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
         setResponseHeaders(resp);
         try {
             String path = req.getPathInfo();
-            if(path == null || path.length() <= 1) throw new Exception("ID obligatorio en la URL");
+            if (path == null || path.length() <= 1) {
+                throw new Exception("ID obligatorio en la URL");
+            }
             int id = Integer.parseInt(path.substring(1));
 
-            String nombre = req.getParameter("nombre");
+            String nombre = req.getParameter("nombreEmpresa");
             String descripcion = req.getParameter("descripcion");
             Part logoPart = req.getPart("logo");
             byte[] logo = null;
-            if(logoPart != null && logoPart.getSize() > 0)
+            if (logoPart != null && logoPart.getSize() > 0) {
                 logo = logoPart.getInputStream().readAllBytes();
+            }
 
             EmpresaDTO e = new EmpresaDTO();
             e.setIdEmpresa(id);
@@ -109,24 +117,27 @@ public class EmpresaServlet extends HttpServlet {
 
             service.actualizar(e);
             resp.getWriter().write("{\"message\":\"Empresa actualizada\"}");
-        } catch(Exception ex){
+        } catch (Exception ex) {
             resp.setStatus(400);
-            resp.getWriter().write("{\"error\":\""+ex.getMessage()+"\"}");
+            resp.getWriter().write("{\"error\":\"" + ex.getMessage() + "\"}");
         }
     }
 
     @Override
+    //http://localhost:8080/VideojuegosBackend/api/empresas/id
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         setResponseHeaders(resp);
         try {
             String path = req.getPathInfo();
-            if(path == null || path.length() <= 1) throw new Exception("ID obligatorio en la URL");
+            if (path == null || path.length() <= 1) {
+                throw new Exception("ID obligatorio en la URL");
+            }
             int id = Integer.parseInt(path.substring(1));
             service.eliminar(id);
             resp.getWriter().write("{\"message\":\"Empresa eliminada\"}");
-        } catch(Exception ex){
+        } catch (Exception ex) {
             resp.setStatus(400);
-            resp.getWriter().write("{\"error\":\""+ex.getMessage()+"\"}");
+            resp.getWriter().write("{\"error\":\"" + ex.getMessage() + "\"}");
         }
     }
 }

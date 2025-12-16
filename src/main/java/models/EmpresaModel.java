@@ -99,6 +99,8 @@ public class EmpresaModel {
     }
 
     public void eliminar(int id) throws Exception {
+        VideojuegoModel videojuego = new VideojuegoModel();
+        videojuego.eliminar(id);
         String sql = "DELETE FROM empresa WHERE Id_empresa=?";
         Connection conn = new ConnectionManager().conectar();
         try (PreparedStatement ps = conn.prepareStatement(sql)) {

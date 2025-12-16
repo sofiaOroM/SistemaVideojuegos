@@ -20,6 +20,12 @@ public class EmpresaService {
         if (e.getNombreEmpresa() == null || e.getNombreEmpresa().isEmpty()) {
             throw new Exception("Nombre obligatorio");
         }
+        if (e.getDescripcion()== null) {
+            throw new Exception("Descripcion obligatorio");
+        }
+        if (e.getLogo() == null ) {
+            throw new Exception("Nombre obligatorio");
+        }
         return model.insertar(e);
     }
 

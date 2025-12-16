@@ -42,7 +42,6 @@ public class VideojuegoServlet extends HttpServlet {
         resp.setHeader("Access-Control-Allow-Headers", "Content-Type");
     }
 
-    // Crear videojuego
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         setResponseHeaders(resp);
@@ -83,6 +82,8 @@ public class VideojuegoServlet extends HttpServlet {
     }
 
     @Override
+    //http://localhost:8080/VideojuegosBackend/api/videojuegos listado general
+    //http://localhost:8080/VideojuegosBackend/api/videojuegos/id uno en especifico
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         setResponseHeaders(resp);
         try {

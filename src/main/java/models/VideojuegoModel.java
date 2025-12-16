@@ -43,12 +43,11 @@ public class VideojuegoModel {
                 int idVideojuego = rs.getInt(1);
 
                 if (v.getCategorias() != null) {
-                    String sqlCat = "INSERT INTO videojuego_categoria(Id_videojuego, Id_categoria, Nombre_categria) VALUES (?,?,?)";
+                    String sqlCat = "INSERT INTO videojuego_categoria(Id_videojuego, Id_categoria) VALUES (?,?)";
                     try (PreparedStatement psCat = conn.prepareStatement(sqlCat)) {
                         for (Integer idCat : v.getCategorias()) {
                             psCat.setInt(1, idVideojuego);
                             psCat.setInt(2, idCat);
-                            psCat.setString(3, ""); // Opcional, nombre categoría si quieres
                             psCat.addBatch();
                         }
                         psCat.executeBatch();
@@ -75,25 +74,25 @@ public class VideojuegoModel {
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 VideojuegoDTO v = new VideojuegoDTO();
-                v.setIdVideojuego(rs.getInt("Id_videojuego"));
-                v.setTitulo(rs.getString("Titulo_videojuego"));
-                v.setDescripcion(rs.getString("Descripcion"));
-                v.setPrecio(rs.getBigDecimal("Precio_videojuego"));
-                v.setClasificacion(rs.getString("Clasificacion"));
-                v.setRequisitos(rs.getString("Requisitos"));
-                v.setImagenPrincipal(rs.getBytes("Imagen_principal"));
-                v.setFechaLanzamiento(rs.getDate("Fecha_lanzamiento"));
-                v.setActivo(rs.getBoolean("Activo"));
-                v.setIdEmpresa(rs.getInt("Id_empresa"));
+                v.setIdVideojuego(rs.getInt("id_videojuego"));
+                v.setTitulo(rs.getString("titulo_videojuego"));
+                v.setDescripcion(rs.getString("descripcion"));
+                v.setPrecio(rs.getBigDecimal("precio_videojuego"));
+                v.setClasificacion(rs.getString("clasificacion"));
+                v.setRequisitos(rs.getString("requisitos"));
+                v.setImagenPrincipal(rs.getBytes("imagen_principal"));
+                v.setFechaLanzamiento(rs.getDate("fecha_lanzamiento"));
+                v.setActivo(rs.getBoolean("activo"));
+                v.setIdEmpresa(rs.getInt("id_empresa"));
 
                 // Obtener categorías
-                String sqlCat = "SELECT Id_categoria FROM videojuego_categoria WHERE Id_videojuego=?";
+                String sqlCat = "SELECT id_categoria FROM videojuego_categoria WHERE id_videojuego=?";
                 try (PreparedStatement psCat = conn.prepareStatement(sqlCat)) {
                     psCat.setInt(1, id);
                     ResultSet rsCat = psCat.executeQuery();
                     List<Integer> categorias = new ArrayList<>();
                     while (rsCat.next()) {
-                        categorias.add(rsCat.getInt("Id_categoria"));
+                        categorias.add(rsCat.getInt("id_categoria"));
                     }
                     v.setCategorias(categorias);
                 }
@@ -114,16 +113,16 @@ public class VideojuegoModel {
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 VideojuegoDTO v = new VideojuegoDTO();
-                v.setIdVideojuego(rs.getInt("Id_videojuego"));
-                v.setTitulo(rs.getString("Titulo_videojuego"));
-                v.setDescripcion(rs.getString("Descripcion"));
-                v.setPrecio(rs.getBigDecimal("Precio_videojuego"));
-                v.setClasificacion(rs.getString("Clasificacion"));
-                v.setRequisitos(rs.getString("Requisitos"));
-                v.setImagenPrincipal(rs.getBytes("Imagen_principal"));
-                v.setFechaLanzamiento(rs.getDate("Fecha_lanzamiento"));
-                v.setActivo(rs.getBoolean("Activo"));
-                v.setIdEmpresa(rs.getInt("Id_empresa"));
+                v.setIdVideojuego(rs.getInt("id_videojuego"));
+                v.setTitulo(rs.getString("titulo_videojuego"));
+                v.setDescripcion(rs.getString("descripcion"));
+                v.setPrecio(rs.getBigDecimal("precio_videojuego"));
+                v.setClasificacion(rs.getString("clasificacion"));
+                v.setRequisitos(rs.getString("requisitos"));
+                v.setImagenPrincipal(rs.getBytes("imagen_principal"));
+                v.setFechaLanzamiento(rs.getDate("fecha_lanzamiento"));
+                v.setActivo(rs.getBoolean("activo"));
+                v.setIdEmpresa(rs.getInt("id_empresa"));
                 lista.add(v);
             }
             return lista;
@@ -159,12 +158,11 @@ public class VideojuegoModel {
                 }
 
                 if (v.getCategorias() != null) {
-                    String sqlCat = "INSERT INTO videojuego_categoria(Id_videojuego, Id_categoria, Nombre_categria) VALUES (?,?,?)";
+                    String sqlCat = "INSERT INTO videojuego_categoria(Id_videojuego, Id_categoria) VALUES (?,?)";
                     try (PreparedStatement psCat = conn.prepareStatement(sqlCat)) {
                         for (Integer idCat : v.getCategorias()) {
                             psCat.setInt(1, v.getIdVideojuego());
                             psCat.setInt(2, idCat);
-                            psCat.setString(3, "");
                             psCat.addBatch();
                         }
                         psCat.executeBatch();
