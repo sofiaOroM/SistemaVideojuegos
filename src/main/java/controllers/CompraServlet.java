@@ -4,6 +4,7 @@
  */
 package controllers;
 
+import com.google.gson.Gson;
 import dto.CompraDTO;
 import service.CompraService;
 import java.io.IOException;
@@ -23,6 +24,7 @@ import java.sql.Date;
 public class CompraServlet extends HttpServlet {
 
     private final CompraService service = new CompraService();
+    private final Gson gson = new Gson();
 
     private void setResponseHeaders(HttpServletResponse resp) {
         resp.setContentType("application/json");
@@ -33,12 +35,9 @@ public class CompraServlet extends HttpServlet {
     }
 
     @Override
+    //http://localhost:8080/VideojuegosBackend/api/compras?idUsuario=6&idVideojuego=8&fechaCompra=2025-11-11
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         setResponseHeaders(resp);
-        System.out.println("id usuario " + req.getParameter("idUsuario"));
-        System.out.println("id videojuego " + req.getParameter("idVideojuego"));
-        System.out.println("fecha " + req.getParameter("fechaCompra"));
-
         try {
             CompraDTO c = new CompraDTO();
 
@@ -51,6 +50,31 @@ public class CompraServlet extends HttpServlet {
         } catch (Exception e) {
             resp.setStatus(400);
             resp.getWriter().write("{\"error desde aqui\":\"" + e.getMessage() + "\"}");
+        }
+    }
+
+    @Override
+    //http://localhost:8080/VideojuegosBackend/api/compras listado general
+    //http://localhost:8080/VideojuegosBackend/api/compras/id uno en especifico
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        setResponseHeaders(resp);
+        try {
+            String path = req.getPathInfo();
+            if (path != null && path.length() > 1) {
+                int id = Integer.parseInt(path.substring(1));
+                CompraDTO c = service.obtener(id);
+                if (c == null) {
+                    resp.setStatus(404);
+                    resp.getWriter().write("{\"error\":\"Compra no encontrada\"}");
+                    return;
+                }
+                resp.getWriter().write(gson.toJson(c));
+            } else {
+                resp.getWriter().write(gson.toJson(service.obtenerTodos()));
+            }
+        } catch (Exception e) {
+            resp.setStatus(400);
+            resp.getWriter().write("{\"error\":\"" + e.getMessage() + "\"}");
         }
     }
 }
