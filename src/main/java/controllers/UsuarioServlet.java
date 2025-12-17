@@ -38,6 +38,7 @@ public class UsuarioServlet extends HttpServlet {
     }
 
     @Override
+    //http://localhost:8080/VideojuegosBackend/api/usuarios?rol=gamer
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
         setResponseHeaders(resp);
         try {
