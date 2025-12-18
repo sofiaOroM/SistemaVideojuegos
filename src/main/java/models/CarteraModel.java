@@ -8,6 +8,7 @@ import com.videojuegosbackend.conexionDB.ConnectionManager;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
 /**
  *
@@ -15,21 +16,14 @@ import java.sql.PreparedStatement;
  */
 public class CarteraModel {
 
-    public void crearCartera(Connection conn, int idUsuario) throws Exception {
+    public void crearCartera(int idUsuario, Connection conn) throws Exception {
 
-        String sql = "INSERT INTO cartera (Id_usuario, Saldo) VALUES (?, ?)";
+        String sql = "INSERT INTO cartera (id_usuario, saldo) VALUES (?, ?)";
 
-        if (conn != null) {
-            try {
-                PreparedStatement ps = conn.prepareStatement(sql);
-                ps.setInt(1, idUsuario);
-                ps.setBigDecimal(2, BigDecimal.ZERO);
-                ps.executeUpdate();
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                throw new Exception("Error al crear cartera");
-            }
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, idUsuario);
+            ps.setBigDecimal(2, new BigDecimal("0.00"));
+            ps.executeUpdate();
         }
     }
 
@@ -46,6 +40,16 @@ public class CarteraModel {
                 e.printStackTrace();
                 throw new Exception("Error al eliminar cartera");
             }
+        }
+    }
+    
+    public void recargar(int id, BigDecimal cantidad) throws Exception{
+        String sql = "UPDATE cartera SET saldo=? WHERE id_cartera=?";
+        
+        Connection conn = new ConnectionManager().conectar();
+        try(PreparedStatement ps = conn.prepareStatement(sql)){
+            ps.setBigDecimal(2, cantidad);
+            
         }
     }
 
