@@ -13,6 +13,12 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Part;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import java.sql.Date;
 import java.util.List;
 import org.json.JSONArray;
@@ -79,7 +85,7 @@ public class UsuarioServlet extends HttpServlet {
                 u.setNickname(nickname);
                 u.setTelefono(telefono);
                 u.setPais(pais);
-            } else if ("empresa".equalsIgnoreCase(rol) ) {
+            } else if ("empresa".equalsIgnoreCase(rol)) {
                 String nombreUsuario = req.getParameter("nombreUsuario");
                 String idEmpresaStr = req.getParameter("idEmpresa");
 
@@ -92,7 +98,7 @@ public class UsuarioServlet extends HttpServlet {
 
                 u.setNombreUsuario(nombreUsuario);
                 u.setIdEmpresa(Integer.parseInt(idEmpresaStr));
-            } else if ("admin".equalsIgnoreCase(rol) ) {
+            } else if ("admin".equalsIgnoreCase(rol)) {
                 String nombreUsuario = req.getParameter("nombreUsuario");
 
                 if (nombreUsuario == null || nombreUsuario.isEmpty()) {
