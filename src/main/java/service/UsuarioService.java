@@ -7,8 +7,10 @@ package service;
 import com.videojuegosbackend.conexionDB.ConnectionManager;
 import dto.UsuarioDTO;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
 import models.UsuarioModel;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import util.PasswordUtil;
 
 /**
@@ -49,6 +51,23 @@ public class UsuarioService {
         } catch(Exception e){
             throw e;
         }
+    }
+    public UsuarioDTO login(String correoElectronico, String password) throws SQLException {
+
+        UsuarioDTO user = model.buscarPorCorreo(correoElectronico);
+
+        if (user == null) {
+            return null;
+        }
+
+        if (!PasswordUtil.verificar(password, user.getPassword())) {
+            return null;
+        }
+
+        // Nunca devolver el hash
+        user.setPassword(null);
+
+        return user;
     }
 
     public UsuarioDTO obtenerUsuario(int id) throws Exception {

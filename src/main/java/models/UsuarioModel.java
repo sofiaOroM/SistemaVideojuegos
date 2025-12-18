@@ -10,10 +10,12 @@ import dto.UsuarioDTO;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 /**
  *
@@ -60,6 +62,30 @@ public class UsuarioModel {
         }
 
         return idUsuario;
+    }
+
+    public UsuarioDTO buscarPorCorreo(String correo) throws SQLException {
+
+        String sql = "SELECT id_usuario, correo_electronico, password, rol, nickname, nombre_usuario "
+           + "FROM usuario WHERE correo_electronico = ?";
+
+        try (Connection conn = new ConnectionManager().conectar(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, correo);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                UsuarioDTO u = new UsuarioDTO();
+                u.setIdUsuario(rs.getInt("id_usuario"));
+                u.setCorreoElectronico(rs.getString("correo_electronico"));
+                u.setPassword(rs.getString("password"));
+                u.setRol(rs.getString("rol"));
+                u.setNickname(rs.getString("nickname"));
+                u.setNombreUsuario(rs.getString("nombre_usuario"));
+                return u;
+            }
+            return null;
+        }
     }
 
     public UsuarioDTO obtenerPorId(int id) throws Exception {
