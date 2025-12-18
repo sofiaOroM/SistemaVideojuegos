@@ -20,9 +20,7 @@ public class ComisionGlobalModel {
         String sql = "SELECT * FROM comision_global WHERE fecha_inicio <= CURDATE() "
                 + "AND (fecha_fin IS NULL OR fecha_fin >= CURDATE()) LIMIT 1";
 
-        try (Connection conn = new ConnectionManager().conectar();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+        try (Connection conn = new ConnectionManager().conectar(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
 
             if (rs.next()) {
                 ComisionGlobalDTO c = new ComisionGlobalDTO();
@@ -34,6 +32,14 @@ public class ComisionGlobalModel {
             }
             return null;
         }
+    }
+
+    public ComisionGlobalDTO obtenerActivaObligatoria() throws Exception {
+        ComisionGlobalDTO c = obtenerActiva();
+        if (c == null) {
+            throw new Exception("Debe existir una comisión global activa");
+        }
+        return c;
     }
 
     public void cerrarComisionActiva(Connection conn) throws Exception {

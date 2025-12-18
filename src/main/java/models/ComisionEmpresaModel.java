@@ -6,6 +6,7 @@ package models;
 
 import com.videojuegosbackend.conexionDB.ConnectionManager;
 import dto.ComisionEmpresaDTO;
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -21,8 +22,7 @@ public class ComisionEmpresaModel {
                 + "AND fecha_inicio <= CURDATE() AND (fecha_fin IS NULL OR "
                 + "fecha_fin >= CURDATE()) LIMIT 1";
 
-        try (Connection conn = new ConnectionManager().conectar();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = new ConnectionManager().conectar(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setInt(1, idEmpresa);
 
@@ -51,6 +51,17 @@ public class ComisionEmpresaModel {
         }
     }
 
+    public void ajustarComisionesMayoresAlGlobal(BigDecimal nuevoGlobal, Connection conn) throws Exception {
+        String sql = "UPDATE empresa_comision SET porcentaje = ? "
+                + "WHERE fecha_fin IS NULL AND porcentaje > ?";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setBigDecimal(1, nuevoGlobal);
+            ps.setBigDecimal(2, nuevoGlobal);
+            ps.executeUpdate();
+        }
+    }
+
     public void insertar(ComisionEmpresaDTO c, Connection conn) throws Exception {
         String sql = "INSERT INTO empresa_comision(id_empresa, porcentaje, fecha_inicio, fecha_fin) "
                 + "VALUES (?,?,?,?)";
@@ -64,4 +75,3 @@ public class ComisionEmpresaModel {
         }
     }
 }
-
