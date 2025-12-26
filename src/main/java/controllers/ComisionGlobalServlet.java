@@ -58,7 +58,7 @@ public class ComisionGlobalServlet extends HttpServlet {
         try {
             String path = req.getPathInfo();
 
-            if (path != null && path.equals("/activa")) {
+            if (path != null && path.equals("activa")) {
                 resp.getWriter().write(
                         gson.toJson(service.obtenerComisionActiva())
                 );
@@ -78,8 +78,7 @@ public class ComisionGlobalServlet extends HttpServlet {
         setResponseHeaders(resp);
 
         try {
-            ComisionGlobalDTO dto
-                    = gson.fromJson(req.getReader(), ComisionGlobalDTO.class);
+            ComisionGlobalDTO dto = gson.fromJson(req.getReader(), ComisionGlobalDTO.class);
 
             service.actualizarComisionGlobal(dto.getPorcentaje());
 

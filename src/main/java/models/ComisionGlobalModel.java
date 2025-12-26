@@ -9,6 +9,8 @@ import dto.ComisionGlobalDTO;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -60,4 +62,25 @@ public class ComisionGlobalModel {
             ps.executeUpdate();
         }
     }
+    
+    public List<ComisionGlobalDTO> obtenerTodos() throws Exception {
+        String sql = "SELECT * FROM comision_global";
+        Connection conn = new ConnectionManager().conectar();
+        List<ComisionGlobalDTO> lista = new ArrayList<>();
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                ComisionGlobalDTO c = new ComisionGlobalDTO();
+                c.setIdComision(rs.getInt("id_comision"));
+                c.setPorcentaje(rs.getBigDecimal("porcentaje"));
+                c.setFechaInicio(rs.getDate("fecha_inicio"));
+                c.setFechaFin(rs.getDate("fecha_fin"));
+                lista.add(c);
+            }
+            return lista;
+        } finally {
+            conn.close();
+        }
+    }
+
 }
