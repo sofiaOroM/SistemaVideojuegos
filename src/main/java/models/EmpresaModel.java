@@ -61,7 +61,7 @@ public class EmpresaModel {
     }
 
     public List<EmpresaDTO> obtenerTodos() throws Exception {
-        String sql = "SELECT * FROM empresa";
+        String sql = "SELECT * FROM empresa WHERE estadoEmpresa=1";
         Connection conn = new ConnectionManager().conectar();
         List<EmpresaDTO> lista = new ArrayList<>();
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -101,7 +101,7 @@ public class EmpresaModel {
     public void eliminar(int id) throws Exception {
         VideojuegoModel videojuego = new VideojuegoModel();
         videojuego.eliminar(id);
-        String sql = "DELETE FROM empresa WHERE Id_empresa=?";
+        String sql = "UPDATE empresa SET estadoEmpresa=0 WHERE Id_empresa=?";
         Connection conn = new ConnectionManager().conectar();
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);

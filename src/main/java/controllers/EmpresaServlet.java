@@ -56,7 +56,7 @@ public class EmpresaServlet extends HttpServlet {
             e.setLogo(logo);
 
             int id = service.crear(e);
-            resp.getWriter().write("{\"message\":\"Empresa creada\",\"id\":" + id + "}");
+            resp.getWriter().write("{\"message\":\"Empresa creada\",\"id Empresa\":" + id + "}");
         } catch (Exception ex) {
             resp.setStatus(400);
             resp.getWriter().write("{\"error\":\"" + ex.getMessage() + "\"}");

@@ -14,6 +14,7 @@ public class EmpresaDTO {
     private String nombreEmpresa;
     private String descripcion;
     private byte[] logo;
+    private String estado;
     
     public EmpresaDTO(){
         
@@ -50,6 +51,12 @@ public class EmpresaDTO {
     public void setLogo(byte[] logo) {
         this.logo = logo;
     }
-    
-    
+
+    public String getEstado() {
+        return estado;
+    }
+
+    public void setEstado(String estado) {
+        this.estado = estado;
+    }    
 }
