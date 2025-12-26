@@ -22,7 +22,7 @@ public class UsuarioService {
     private final UsuarioModel model = new UsuarioModel();
 
     private final CarteraService carteraService = new CarteraService();
-
+    
     public int crearUsuario(UsuarioDTO u) throws Exception {
         if(u.getCorreoElectronico() == null || u.getCorreoElectronico().isEmpty())
             throw new Exception("Correo obligatorio");
