@@ -13,6 +13,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Part;
+import java.util.Base64;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -41,6 +42,7 @@ public class EmpresaServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
         setResponseHeaders(resp);
         try {
+            
             String nombre = req.getParameter("nombreEmpresa");
             String descripcion = req.getParameter("descripcion");
 
@@ -56,7 +58,7 @@ public class EmpresaServlet extends HttpServlet {
             e.setLogo(logo);
 
             int id = service.crear(e);
-            resp.getWriter().write("{\"message\":\"Empresa creada\",\"id\":" + id + "}");
+            resp.getWriter().write("{\"message\":\"Empresa creada\",\"id Empresa\":" + id + "}");
         } catch (Exception ex) {
             resp.setStatus(400);
             resp.getWriter().write("{\"error\":\"" + ex.getMessage() + "\"}");
@@ -78,10 +80,14 @@ public class EmpresaServlet extends HttpServlet {
                     resp.getWriter().write("{\"error\":\"Empresa no encontrada\"}");
                     return;
                 }
-                resp.getWriter().write(new JSONObject(e).toString());
+                JSONObject json = empresaToJson(e);
+                resp.getWriter().write(json.toString());
             } else {
                 List<EmpresaDTO> lista = service.obtenerTodos();
-                JSONArray arr = new JSONArray(lista);
+                JSONArray arr = new JSONArray();
+                for (EmpresaDTO e : lista) {
+                    arr.put(empresaToJson(e));
+                }
                 resp.getWriter().write(arr.toString());
             }
         } catch (Exception ex) {
@@ -139,5 +145,24 @@ public class EmpresaServlet extends HttpServlet {
             resp.setStatus(400);
             resp.getWriter().write("{\"error\":\"" + ex.getMessage() + "\"}");
         }
+    
     }
+    
+    private JSONObject empresaToJson(EmpresaDTO e) {
+        JSONObject json = new JSONObject();
+
+        json.put("idEmpresa", e.getIdEmpresa());
+        json.put("nombreEmpresa", e.getNombreEmpresa());
+        json.put("descripcion", e.getDescripcion());
+
+        if (e.getLogo() != null) {
+            String base64 = Base64.getEncoder().encodeToString(e.getLogo());
+            json.put("logo", base64);
+        } else {
+            json.put("logo", JSONObject.NULL);
+        }
+
+        return json;
+    }
+
 }

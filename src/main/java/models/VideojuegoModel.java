@@ -9,6 +9,7 @@ import dto.VideojuegoDTO;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,50 +20,37 @@ import java.util.List;
  */
 public class VideojuegoModel {
 
-    public int insertar(VideojuegoDTO v) throws Exception {
+    public int insertar(VideojuegoDTO v, Connection conn) throws Exception {
         String sql = "INSERT INTO videojuego(Titulo_videojuego, Descripcion, Precio_videojuego, Clasificacion, "
                 + "Requisitos, Imagen_principal, Fecha_lanzamiento, Activo, Id_empresa) VALUES (?,?,?,?,?,?,?,?,?)";
-        Connection conn = new ConnectionManager().conectar();
-        try {
-            conn.setAutoCommit(false);
+        try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setString(1, v.getTitulo());
+            ps.setString(2, v.getDescripcion());
+            ps.setBigDecimal(3, v.getPrecio());
+            ps.setString(4, v.getClasificacion());
+            ps.setString(5, v.getRequisitos());
+            ps.setBytes(6, v.getImagenPrincipal());
+            ps.setDate(7, v.getFechaLanzamiento());
+            ps.setBoolean(8, v.isActivo());
+            ps.setInt(9, v.getIdEmpresa());
+            ps.executeUpdate();
 
-            try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-                ps.setString(1, v.getTitulo());
-                ps.setString(2, v.getDescripcion());
-                ps.setBigDecimal(3, v.getPrecio());
-                ps.setString(4, v.getClasificacion());
-                ps.setString(5, v.getRequisitos());
-                ps.setBytes(6, v.getImagenPrincipal());
-                ps.setDate(7, v.getFechaLanzamiento());
-                ps.setBoolean(8, v.isActivo());
-                ps.setInt(9, v.getIdEmpresa());
-                ps.executeUpdate();
+            ResultSet rs = ps.getGeneratedKeys();
+            rs.next();
+            int idVideojuego = rs.getInt(1);
 
-                ResultSet rs = ps.getGeneratedKeys();
-                rs.next();
-                int idVideojuego = rs.getInt(1);
-
-                if (v.getCategorias() != null) {
-                    String sqlCat = "INSERT INTO videojuego_categoria(Id_videojuego, Id_categoria) VALUES (?,?)";
-                    try (PreparedStatement psCat = conn.prepareStatement(sqlCat)) {
-                        for (Integer idCat : v.getCategorias()) {
-                            psCat.setInt(1, idVideojuego);
-                            psCat.setInt(2, idCat);
-                            psCat.addBatch();
-                        }
-                        psCat.executeBatch();
+            if (v.getCategorias() != null) {
+                String sqlCat = "INSERT INTO videojuego_categoria(Id_videojuego, Id_categoria) VALUES (?,?)";
+                try (PreparedStatement psCat = conn.prepareStatement(sqlCat)) {
+                    for (Integer idCat : v.getCategorias()) {
+                        psCat.setInt(1, idVideojuego);
+                        psCat.setInt(2, idCat);
+                        psCat.addBatch();
                     }
+                    psCat.executeBatch();
                 }
-
-                conn.commit();
-                return idVideojuego;
-            } catch (Exception e) {
-                conn.rollback();
-                throw e;
             }
-        } finally {
-            conn.setAutoCommit(true);
-            conn.close();
+            return idVideojuego;
         }
     }
 
@@ -100,6 +88,33 @@ public class VideojuegoModel {
                 return v;
             }
             return null;
+        } finally {
+            conn.close();
+        }
+    }
+
+    public List<VideojuegoDTO> obtenerPorEmpresa(int idEmpresa) throws SQLException {
+        String sql = "SELECT * FROM videojuego WHERE id_empresa = ?";
+        Connection conn = new ConnectionManager().conectar();
+        List<VideojuegoDTO> lista = new ArrayList<>();
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, idEmpresa);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                VideojuegoDTO v = new VideojuegoDTO();
+                v.setIdVideojuego(rs.getInt("id_videojuego"));
+                v.setTitulo(rs.getString("titulo_videojuego"));
+                v.setDescripcion(rs.getString("descripcion"));
+                v.setPrecio(rs.getBigDecimal("precio_videojuego"));
+                v.setClasificacion(rs.getString("clasificacion"));
+                v.setRequisitos(rs.getString("requisitos"));
+                v.setImagenPrincipal(rs.getBytes("imagen_principal"));
+                v.setFechaLanzamiento(rs.getDate("fecha_lanzamiento"));
+                v.setActivo(rs.getBoolean("activo"));
+                v.setIdEmpresa(rs.getInt("id_empresa"));
+                lista.add(v);
+            }
+            return lista;
         } finally {
             conn.close();
         }
@@ -186,8 +201,7 @@ public class VideojuegoModel {
         Connection conn = new ConnectionManager().conectar();
         try {
             conn.setAutoCommit(false);
-            try (PreparedStatement psDel = conn.prepareStatement(sqlDel); 
-                    PreparedStatement ps = conn.prepareStatement(sql)) {
+            try (PreparedStatement psDel = conn.prepareStatement(sqlDel); PreparedStatement ps = conn.prepareStatement(sql)) {
                 psDel.setInt(1, id);
                 psDel.executeUpdate();
 

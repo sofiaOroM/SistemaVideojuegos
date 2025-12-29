@@ -7,8 +7,6 @@ package controllers;
 import dto.VideojuegoDTO;
 import com.google.gson.Gson;
 import java.io.IOException;
-import java.io.PrintWriter;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -19,8 +17,10 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import service.VideojuegoService;
 
 /**
@@ -34,10 +34,11 @@ public class VideojuegoServlet extends HttpServlet {
     private final VideojuegoService service = new VideojuegoService();
     private final Gson gson = new Gson();
 
-    private void setResponseHeaders(HttpServletResponse resp){
+    private void setResponseHeaders(HttpServletResponse resp) {
         resp.setContentType("application/json");
         resp.setCharacterEncoding("UTF-8");
         resp.setHeader("Access-Control-Allow-Origin", "http://localhost:4200");
+        resp.setHeader("Access-Control-Allow-Credentials", "true");
         resp.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE, OPTIONS");
         resp.setHeader("Access-Control-Allow-Headers", "Content-Type");
     }
@@ -48,6 +49,7 @@ public class VideojuegoServlet extends HttpServlet {
         try {
             VideojuegoDTO v = new VideojuegoDTO();
 
+            
             v.setTitulo(req.getParameter("titulo"));
             v.setDescripcion(req.getParameter("descripcion"));
             v.setPrecio(new BigDecimal(req.getParameter("precio")));
@@ -58,15 +60,17 @@ public class VideojuegoServlet extends HttpServlet {
             v.setIdEmpresa(Integer.parseInt(req.getParameter("idEmpresa")));
 
             String[] catIds = req.getParameterValues("categorias");
-            if(catIds != null){
+            if (catIds != null) {
                 List<Integer> categorias = new ArrayList<>();
-                for(String c : catIds) categorias.add(Integer.valueOf(c));
+                for (String c : catIds) {
+                    categorias.add(Integer.valueOf(c));
+                }
                 v.setCategorias(categorias);
             }
 
             Part filePart = req.getPart("imagenPrincipal");
-            if(filePart != null && filePart.getSize() > 0){
-                try(InputStream is = filePart.getInputStream()){
+            if (filePart != null && filePart.getSize() > 0) {
+                try (InputStream is = filePart.getInputStream()) {
                     v.setImagenPrincipal(is.readAllBytes());
                 }
             } else {
@@ -74,10 +78,10 @@ public class VideojuegoServlet extends HttpServlet {
             }
 
             int id = service.crear(v);
-            resp.getWriter().write("{\"message\":\"Videojuego creado\",\"id\":"+id+"}");
-        } catch(Exception e){
+            resp.getWriter().write("{\"message\":\"Videojuego creado\",\"id\":" + id + "}");
+        } catch (Exception e) {
             resp.setStatus(400);
-            resp.getWriter().write("{\"error\":\""+e.getMessage()+"\"}");
+            resp.getWriter().write("{\"error\":\"" + e.getMessage() + "\"}");
         }
     }
 
@@ -88,21 +92,38 @@ public class VideojuegoServlet extends HttpServlet {
         setResponseHeaders(resp);
         try {
             String path = req.getPathInfo();
-            if(path != null && path.length() > 1){
+            if (path != null && path.startsWith("/empresa/")) {
+
+                int idEmpresa = Integer.parseInt(path.replace("/empresa/", ""));
+                List<VideojuegoDTO> lista = service.obtenerPorEmpresa(idEmpresa);
+                JSONArray arr = new JSONArray();
+                for (VideojuegoDTO v : lista) {
+                    arr.put(videojuegoToJson(v));
+                }
+                resp.getWriter().write(arr.toString());
+                return;
+            }
+            if (path != null && path.length() > 1) {
                 int id = Integer.parseInt(path.substring(1));
                 VideojuegoDTO v = service.obtener(id);
-                if(v == null){
+                if (v == null) {
                     resp.setStatus(404);
                     resp.getWriter().write("{\"error\":\"Videojuego no encontrado\"}");
                     return;
                 }
-                resp.getWriter().write(gson.toJson(v));
+                JSONObject json = videojuegoToJson(v);
+                resp.getWriter().write(json.toString());
             } else {
-                resp.getWriter().write(gson.toJson(service.obtenerTodos()));
+                List<VideojuegoDTO> lista = service.obtenerTodos();
+                JSONArray arr = new JSONArray();
+                for (VideojuegoDTO v : lista) {
+                    arr.put(videojuegoToJson(v));
+                }
+                resp.getWriter().write(arr.toString());
             }
-        } catch(Exception e){
+        } catch (Exception e){
             resp.setStatus(400);
-            resp.getWriter().write("{\"error\":\""+e.getMessage()+"\"}");
+            resp.getWriter().write("{\"error\":\"" + e.getMessage() + "\"}");
         }
     }
 
@@ -123,24 +144,26 @@ public class VideojuegoServlet extends HttpServlet {
             v.setIdEmpresa(Integer.parseInt(req.getParameter("idEmpresa")));
 
             String[] catIds = req.getParameterValues("categorias");
-            if(catIds != null){
+            if (catIds != null) {
                 List<Integer> categorias = new ArrayList<>();
-                for(String c : catIds) categorias.add(Integer.valueOf(c));
+                for (String c : catIds) {
+                    categorias.add(Integer.valueOf(c));
+                }
                 v.setCategorias(categorias);
             }
 
             Part filePart = req.getPart("imagenPrincipal");
-            if(filePart != null && filePart.getSize() > 0){
-                try(InputStream is = filePart.getInputStream()){
+            if (filePart != null && filePart.getSize() > 0) {
+                try (InputStream is = filePart.getInputStream()) {
                     v.setImagenPrincipal(is.readAllBytes());
                 }
             }
 
             service.actualizar(v);
             resp.getWriter().write("{\"message\":\"Videojuego actualizado\"}");
-        } catch(Exception e){
+        } catch (Exception e) {
             resp.setStatus(400);
-            resp.getWriter().write("{\"error\":\""+e.getMessage()+"\"}");
+            resp.getWriter().write("{\"error\":\"" + e.getMessage() + "\"}");
         }
     }
 
@@ -151,9 +174,40 @@ public class VideojuegoServlet extends HttpServlet {
             int id = Integer.parseInt(req.getPathInfo().substring(1));
             service.eliminar(id);
             resp.getWriter().write("{\"message\":\"Videojuego eliminado\"}");
-        } catch(Exception e){
+        } catch (Exception e) {
             resp.setStatus(400);
-            resp.getWriter().write("{\"error\":\""+e.getMessage()+"\"}");
+            resp.getWriter().write("{\"error\":\"" + e.getMessage() + "\"}");
         }
     }
+
+    private JSONObject videojuegoToJson(VideojuegoDTO v) {
+        JSONObject json = new JSONObject();
+
+        json.put("idVideojuego", v.getIdVideojuego());
+        json.put("titulo", v.getTitulo());
+        json.put("descripcion", v.getDescripcion());
+        json.put("precio", v.getPrecio());
+        json.put("clasificacion", v.getClasificacion());
+        json.put("requisitos", v.getRequisitos());
+        json.put("fechaLanzamiento", v.getFechaLanzamiento());
+        json.put("activo", v.isActivo());
+        json.put("idEmpresa", v.getIdEmpresa());
+        json.put("categorias", v.getCategorias());
+
+        if (v.getImagenPrincipal() != null) {
+            String base64 = Base64.getEncoder().encodeToString(v.getImagenPrincipal());
+            json.put("imagenPrincipal", base64);
+        } else {
+            json.put("imagenPrincipal", JSONObject.NULL);
+        }
+
+        return json;
+    }
+
+    @Override
+    protected void doOptions(HttpServletRequest req, HttpServletResponse resp) {
+        setResponseHeaders(resp);
+        resp.setStatus(HttpServletResponse.SC_OK);
+    }
+
 }

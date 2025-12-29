@@ -66,8 +66,8 @@ public class UsuarioModel {
 
     public UsuarioDTO buscarPorCorreo(String correo) throws SQLException {
 
-        String sql = "SELECT id_usuario, correo_electronico, password, rol, nickname, nombre_usuario "
-           + "FROM usuario WHERE correo_electronico = ?";
+        String sql = "SELECT id_usuario, correo_electronico, password, rol, nickname, nombre_usuario, id_empresa, avatar "
+                + "FROM usuario WHERE correo_electronico = ?";
 
         try (Connection conn = new ConnectionManager().conectar(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -82,6 +82,8 @@ public class UsuarioModel {
                 u.setRol(rs.getString("rol"));
                 u.setNickname(rs.getString("nickname"));
                 u.setNombreUsuario(rs.getString("nombre_usuario"));
+                u.setIdEmpresa(rs.getInt("id_empresa"));
+                u.setAvatar(rs.getBytes("avatar"));
                 return u;
             }
             return null;
@@ -109,6 +111,33 @@ public class UsuarioModel {
                 return u;
             }
             return null;
+        } finally {
+            conn.close();
+        }
+    }
+
+    public List<UsuarioDTO> obtenerPorEmpresa(int idEmpresa) throws SQLException {
+        String sql = "SELECT * FROM usuario WHERE id_empresa = ?";
+        Connection conn = new ConnectionManager().conectar();
+        List<UsuarioDTO> lista = new ArrayList<>();
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, idEmpresa);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                UsuarioDTO u = new UsuarioDTO();
+                u.setIdUsuario(rs.getInt("Id_usuario"));
+                u.setNombreUsuario(rs.getString("Nombre_usuario"));
+                u.setCorreoElectronico(rs.getString("Correo_electronico"));
+                u.setFechaNacimiento(rs.getDate("Fecha_nacimiento"));
+                u.setNickname(rs.getString("Nickname"));
+                u.setTelefono(rs.getString("Telefono"));
+                u.setPais(rs.getString("Pais"));
+                u.setRol(rs.getString("Rol"));
+                u.setIdEmpresa(rs.getInt("Id_empresa") == 0 ? null : rs.getInt("Id_empresa"));
+                u.setAvatar(rs.getBytes("Avatar"));
+                lista.add(u);
+            }
+            return lista;
         } finally {
             conn.close();
         }

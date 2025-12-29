@@ -9,6 +9,7 @@ import dto.ComisionEmpresaDTO;
 import dto.ComisionGlobalDTO;
 import java.math.BigDecimal;
 import java.sql.Connection;
+import java.util.List;
 import models.ComisionEmpresaModel;
 import models.ComisionGlobalModel;
 
@@ -49,8 +50,8 @@ public class ComisionService {
 
         if (c.getPorcentaje().compareTo(global.getPorcentaje()) > 0) {
             throw new Exception(
-                "El porcentaje de la empresa no puede ser mayor al porcentaje global vigente ("
-                + global.getPorcentaje() + "%)"
+                    "El porcentaje de la empresa no puede ser mayor al porcentaje global vigente ("
+                    + global.getPorcentaje() + "%)"
             );
         }
 
@@ -81,9 +82,9 @@ public class ComisionService {
     }
 
     private void validarPorcentaje(BigDecimal p) throws Exception {
-        if (p == null ||
-            p.compareTo(BigDecimal.ZERO) <= 0 ||
-            p.compareTo(new BigDecimal("100")) > 0) {
+        if (p == null
+                || p.compareTo(BigDecimal.ZERO) <= 0
+                || p.compareTo(new BigDecimal("100")) > 0) {
             throw new Exception("Porcentaje inválido (1–100)");
         }
     }
@@ -92,14 +93,12 @@ public class ComisionService {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
-    public Object obtenerComisionActiva() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public Object obtenerComisionActiva() throws Exception {
+        ComisionGlobalDTO global = globalModel.obtenerActivaObligatoria();
+        return global;
     }
 
-    public Object listarTodas() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public List<ComisionGlobalDTO> listarTodas() throws Exception {
+        return globalModel.obtenerTodos();
     }
-    
-    
 }
-

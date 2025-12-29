@@ -51,7 +51,9 @@ public class EmpresaModel {
                 e.setIdEmpresa(rs.getInt("Id_empresa"));
                 e.setNombreEmpresa(rs.getString("Nombre_empresa"));
                 e.setDescripcion(rs.getString("Descripcion"));
-                e.setLogo(rs.getBytes("Logo"));
+                byte[] logoBytes = rs.getBytes("logo");
+                if(logoBytes != null)
+                        e.setLogo(rs.getBytes("Logo"));
                 return e;
             }
             return null;
@@ -61,7 +63,7 @@ public class EmpresaModel {
     }
 
     public List<EmpresaDTO> obtenerTodos() throws Exception {
-        String sql = "SELECT * FROM empresa";
+        String sql = "SELECT * FROM empresa WHERE estadoEmpresa=1";
         Connection conn = new ConnectionManager().conectar();
         List<EmpresaDTO> lista = new ArrayList<>();
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -101,7 +103,7 @@ public class EmpresaModel {
     public void eliminar(int id) throws Exception {
         VideojuegoModel videojuego = new VideojuegoModel();
         videojuego.eliminar(id);
-        String sql = "DELETE FROM empresa WHERE Id_empresa=?";
+        String sql = "UPDATE empresa SET estadoEmpresa=0 WHERE Id_empresa=?";
         Connection conn = new ConnectionManager().conectar();
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
