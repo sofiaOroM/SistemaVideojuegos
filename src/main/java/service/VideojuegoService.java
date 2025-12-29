@@ -4,7 +4,10 @@
  */
 package service;
 
+import com.videojuegosbackend.conexionDB.ConnectionManager;
 import dto.VideojuegoDTO;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
 import models.VideojuegoModel;
 
@@ -15,6 +18,7 @@ import models.VideojuegoModel;
 public class VideojuegoService {
 
     private final VideojuegoModel videojuego = new VideojuegoModel();
+    private final ComentarioService comentarioService = new ComentarioService();
 
     public int crear(VideojuegoDTO v) throws Exception {
         if (v.getTitulo() == null || v.getTitulo().isEmpty()) {
@@ -23,11 +27,29 @@ public class VideojuegoService {
         if (v.getImagenPrincipal() == null) {
             throw new Exception("Imagen principal obligatoria");
         }
-        return videojuego.insertar(v);
+        ConnectionManager cm = new ConnectionManager();
+        try (Connection conn = cm.conectar()) {
+            conn.setAutoCommit(false);
+            System.out.println("conexion:" + conn);
+            int idVideojuego = videojuego.insertar(v, conn);
+            System.out.println("conexion:" + conn);
+            comentarioService.activarComentario(idVideojuego, conn);
+            System.out.println("conexion:" + conn);
+            conn.commit();
+            conn.setAutoCommit(true);
+            conn.close();
+            return idVideojuego;
+        } catch (Exception e) {
+            throw e;
+        }
     }
 
     public VideojuegoDTO obtener(int id) throws Exception {
         return videojuego.obtenerPorId(id);
+    }
+
+    public List<VideojuegoDTO> obtenerPorEmpresa(int idEmpresa) throws SQLException {
+        return videojuego.obtenerPorEmpresa(idEmpresa);
     }
 
     public List<VideojuegoDTO> obtenerTodos() throws Exception {
