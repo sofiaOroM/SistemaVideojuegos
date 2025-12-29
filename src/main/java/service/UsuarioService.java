@@ -47,11 +47,14 @@ public class UsuarioService {
             }
 
             conn.commit();
+            conn.setAutoCommit(true);
+            conn.close();
             return idUsuario;
         } catch(Exception e){
             throw e;
         }
     }
+    
     public UsuarioDTO login(String correoElectronico, String password) throws SQLException {
 
         UsuarioDTO user = model.buscarPorCorreo(correoElectronico);
@@ -72,6 +75,10 @@ public class UsuarioService {
 
     public UsuarioDTO obtenerUsuario(int id) throws Exception {
         return model.obtenerPorId(id);
+    }
+    
+    public List<UsuarioDTO> obtenerPorEmpresa(int idEmpresa) throws SQLException {
+        return model.obtenerPorEmpresa(idEmpresa);
     }
 
     public List<UsuarioDTO> obtenerTodos() throws Exception {

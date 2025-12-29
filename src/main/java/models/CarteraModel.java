@@ -42,14 +42,14 @@ public class CarteraModel {
             }
         }
     }
-    
-    public void recargar(int id, BigDecimal cantidad) throws Exception{
+
+    public void recargar(int id, BigDecimal cantidad) throws Exception {
         String sql = "UPDATE cartera SET saldo=? WHERE id_cartera=?";
-        
+
         Connection conn = new ConnectionManager().conectar();
-        try(PreparedStatement ps = conn.prepareStatement(sql)){
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setBigDecimal(2, cantidad);
-            
+
         }
     }
 

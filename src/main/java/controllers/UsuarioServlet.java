@@ -14,6 +14,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Part;
 import java.sql.Date;
+import java.util.Base64;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -123,6 +124,17 @@ public class UsuarioServlet extends HttpServlet {
         setResponseHeaders(resp);
         try {
             String path = req.getPathInfo();
+            if (path != null && path.startsWith("/empresa/")) {
+
+                int idEmpresa = Integer.parseInt(path.replace("/empresa/", ""));
+                List<UsuarioDTO> lista = service.obtenerPorEmpresa(idEmpresa);
+                JSONArray arr = new JSONArray();
+                for (UsuarioDTO u : lista) {
+                    arr.put(usuarioToJson(u));
+                }
+                resp.getWriter().write(arr.toString());
+                return;
+            }
             if (path != null && path.length() > 1) {
                 int id = Integer.parseInt(path.substring(1));
                 UsuarioDTO u = service.obtenerUsuario(id);
@@ -202,4 +214,29 @@ public class UsuarioServlet extends HttpServlet {
             resp.getWriter().write("{\"error\":\"" + e.getMessage() + "\"}");
         }
     }
+
+    private JSONObject usuarioToJson(UsuarioDTO u) {
+        JSONObject json = new JSONObject();
+
+        json.put("idUsuario", u.getIdUsuario());
+        json.put("nombreUsuario", u.getNombreUsuario());
+        json.put("correoElectronico", u.getCorreoElectronico());
+        json.put("fechaNacimiento", u.getFechaNacimiento());
+        json.put("password", u.getPassword());
+        json.put("nickname", u.getNickname());
+        json.put("telefono", u.getTelefono());
+        json.put("pais", u.getPais());
+        json.put("rol", u.getRol());
+        json.put("idEmpresa", u.getIdEmpresa());
+        json.put("avatar", u.getAvatar());
+        if (u.getAvatar() != null) {
+            String base64 = Base64.getEncoder().encodeToString(u.getAvatar());
+            json.put("avatar", base64);
+        } else {
+            json.put("avatar", JSONObject.NULL);
+        }
+
+        return json;
+    }
+
 }
