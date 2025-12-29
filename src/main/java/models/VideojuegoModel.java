@@ -93,7 +93,7 @@ public class VideojuegoModel {
         }
     }
 
-    public List<VideojuegoDTO> obtenerPorEmpresa(int idEmpresa) throws SQLException {
+    public List<VideojuegoDTO> obtenerPorEmpresa(int idEmpresa) throws Exception {
         String sql = "SELECT * FROM videojuego WHERE id_empresa = ?";
         Connection conn = new ConnectionManager().conectar();
         List<VideojuegoDTO> lista = new ArrayList<>();
@@ -112,6 +112,7 @@ public class VideojuegoModel {
                 v.setFechaLanzamiento(rs.getDate("fecha_lanzamiento"));
                 v.setActivo(rs.getBoolean("activo"));
                 v.setIdEmpresa(rs.getInt("id_empresa"));
+                v.setCategorias(obtenerCategorias(v.getIdVideojuego(), conn));
                 lista.add(v);
             }
             return lista;
@@ -138,6 +139,7 @@ public class VideojuegoModel {
                 v.setFechaLanzamiento(rs.getDate("fecha_lanzamiento"));
                 v.setActivo(rs.getBoolean("activo"));
                 v.setIdEmpresa(rs.getInt("id_empresa"));
+                v.setCategorias(obtenerCategorias(v.getIdVideojuego(), conn));
                 lista.add(v);
             }
             return lista;
@@ -217,4 +219,19 @@ public class VideojuegoModel {
             conn.close();
         }
     }
+
+    private List<Integer> obtenerCategorias(int idVideojuego, Connection conn) throws Exception {
+        List<Integer> categorias = new ArrayList<>();
+
+        String sql = "SELECT id_categoria FROM videojuego_categoria WHERE id_videojuego = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, idVideojuego);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                categorias.add(rs.getInt("id_categoria"));
+            }
+        }
+        return categorias;
+    }
+
 }
