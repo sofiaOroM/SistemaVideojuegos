@@ -13,6 +13,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import java.io.BufferedReader;
 import service.UsuarioService;
 
@@ -29,13 +30,17 @@ public class LoginServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
 
+        resp.setHeader("Access-Control-Allow-Origin", "http://localhost:4200");
+        resp.setHeader("Access-Control-Allow-Credentials", "true");
+        resp.setHeader("Access-Control-Allow-Headers", "Content-Type");
+        resp.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+
         resp.setContentType("application/json");
         resp.setCharacterEncoding("UTF-8");
 
         try {
             BufferedReader reader = req.getReader();
             Gson gson = new Gson();
-
             UsuarioDTO requestUser = gson.fromJson(reader, UsuarioDTO.class);
 
             if (requestUser == null) {
@@ -54,6 +59,10 @@ public class LoginServlet extends HttpServlet {
                 resp.getWriter().write("{\"mensaje\":\"Correo o contraseña incorrectos\"}");
                 return;
             }
+
+            HttpSession session = req.getSession(true);
+            session.setAttribute("usuario", user);
+
             resp.setStatus(HttpServletResponse.SC_OK);
             resp.getWriter().write(gson.toJson(user));
 
@@ -62,5 +71,14 @@ public class LoginServlet extends HttpServlet {
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             resp.getWriter().write("{\"error\":\"Error interno en el servidor\"}");
         }
+    }
+
+    @Override
+    protected void doOptions(HttpServletRequest req, HttpServletResponse resp) {
+        resp.setHeader("Access-Control-Allow-Origin", "http://localhost:4200");
+        resp.setHeader("Access-Control-Allow-Credentials", "true");
+        resp.setHeader("Access-Control-Allow-Headers", "Content-Type");
+        resp.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+        resp.setStatus(HttpServletResponse.SC_OK);
     }
 }
