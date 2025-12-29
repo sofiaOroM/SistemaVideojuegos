@@ -5,9 +5,11 @@
 package models;
 
 import com.videojuegosbackend.conexionDB.ConnectionManager;
+import dto.CarteraDTO;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
@@ -43,13 +45,36 @@ public class CarteraModel {
         }
     }
 
-    public void recargar(int id, BigDecimal cantidad) throws Exception {
-        String sql = "UPDATE cartera SET saldo=? WHERE id_cartera=?";
+    public CarteraDTO obtenerCarteraUsuario(int idUsuario) throws Exception {
+        String sql = "SELECT * FROM cartera WHERE Id_usuario=?";
+
+        CarteraDTO c = new CarteraDTO();
+        Connection conn = new ConnectionManager().conectar();
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, idUsuario);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                c.setIdCartera(rs.getInt("id_cartera"));
+                c.setIdUsuario(rs.getInt("id_usuario"));
+                c.setSaldo(rs.getBigDecimal("saldo"));
+
+            }
+            return c;
+        } finally {
+            conn.close();
+        }
+    }
+
+    public void recargarPorUsuario(int idUsuario, BigDecimal cantidad) throws Exception {
+        String sql = "UPDATE cartera SET saldo = saldo + ? WHERE id_usuario = ?";
 
         Connection conn = new ConnectionManager().conectar();
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setBigDecimal(2, cantidad);
-
+            ps.setBigDecimal(1, cantidad);
+            ps.setInt(2, idUsuario);
+            ps.executeUpdate();
+        } finally {
+            conn.close();
         }
     }
 
