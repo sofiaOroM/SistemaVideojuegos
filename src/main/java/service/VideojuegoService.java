@@ -11,6 +11,8 @@ import java.sql.SQLException;
 import java.util.List;
 import models.VideojuegoModel;
 
+import dto.VideojuegoDTO;
+
 /**
  *
  * @author sofia
@@ -48,7 +50,7 @@ public class VideojuegoService {
         return videojuego.obtenerPorId(id);
     }
 
-    public List<VideojuegoDTO> obtenerPorEmpresa(int idEmpresa) throws SQLException {
+    public List<VideojuegoDTO> obtenerPorEmpresa(int idEmpresa) throws Exception {
         return videojuego.obtenerPorEmpresa(idEmpresa);
     }
 
