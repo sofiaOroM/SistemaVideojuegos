@@ -51,7 +51,9 @@ public class EmpresaModel {
                 e.setIdEmpresa(rs.getInt("Id_empresa"));
                 e.setNombreEmpresa(rs.getString("Nombre_empresa"));
                 e.setDescripcion(rs.getString("Descripcion"));
-                e.setLogo(rs.getBytes("Logo"));
+                byte[] logoBytes = rs.getBytes("logo");
+                if(logoBytes != null)
+                        e.setLogo(rs.getBytes("Logo"));
                 return e;
             }
             return null;
