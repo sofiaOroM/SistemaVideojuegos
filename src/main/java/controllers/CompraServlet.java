@@ -33,7 +33,6 @@ public class CompraServlet extends HttpServlet {
         resp.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE, OPTIONS");
         resp.setHeader("Access-Control-Allow-Headers", "Content-Type");
     }
-
     @Override
     //http://localhost:8080/VideojuegosBackend/api/compras?idUsuario=6&idVideojuego=8&fechaCompra=2025-11-11
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {

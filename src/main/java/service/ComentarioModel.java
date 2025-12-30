@@ -4,10 +4,15 @@
  */
 package service;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.videojuegosbackend.conexionDB.ConnectionManager;
+import dto.ComentarioDTO;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Statement;
+import java.sql.Types;
 
 /**
  *
@@ -15,8 +20,38 @@ import java.sql.ResultSet;
  */
 public class ComentarioModel {
 
-    public void activarComentario(int idVideojuego, Connection conn) throws Exception {
+    public int insertar(ComentarioDTO c) throws Exception {
+        String sql = "INSERT INTO comentario(id_usuario, id_videojuego, id_comentario_padre, comentario, fecha_comentario) "
+                + "VALUES (?,?,?,?,NOW())";
 
+        Connection conn = new ConnectionManager().conectar();
+        PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+
+        ps.setInt(1, c.getIdUsuario());
+        ps.setInt(2, c.getIdVideojuego());
+
+        if (c.getIdComentarioPadre() != null) {
+            ps.setInt(3, c.getIdComentarioPadre());
+        } else {
+            ps.setNull(3, Types.INTEGER);
+        }
+
+        ps.setString(4, c.getComentario());
+
+        ps.executeUpdate();
+
+        ResultSet rs = ps.getGeneratedKeys();
+        rs.next();
+        int idComentario = rs.getInt(1);
+
+        rs.close();
+        ps.close();
+        conn.close();
+
+        return idComentario;
+    }
+
+    public void activarComentario(int idVideojuego, Connection conn) throws Exception {
         String sql = "INSERT INTO visibilidad_comentario(id_videojuego, activo) VALUES (?, ?)";
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -31,8 +66,7 @@ public class ComentarioModel {
 
     public boolean obtenerEstado(int idVideojuego) throws Exception {
         String sql = "SELECT activo FROM visibilidad_comentario WHERE id_videojuego = ?";
-        try (Connection conn = new ConnectionManager().conectar(); 
-                PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = new ConnectionManager().conectar(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setInt(1, idVideojuego);
             ResultSet rs = ps.executeQuery();
@@ -78,6 +112,29 @@ public class ComentarioModel {
         } finally {
             conn.close();
         }
+    }
+
+    public String listarPorVideojuego(int idVideojuego) throws Exception {
+        String sql = "SELECT id_comentario, id_usuario, comentario, fecha_comentario "
+                + "FROM comentario WHERE id_videojuego = ? ORDER BY fecha_comentario DESC";
+
+        JsonArray array = new JsonArray();
+
+        try (Connection conn = new ConnectionManager().conectar(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, idVideojuego);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                JsonObject obj = new JsonObject();
+                obj.addProperty("idComentario", rs.getInt("id_comentario"));
+                obj.addProperty("idUsuario", rs.getInt("id_usuario"));
+                obj.addProperty("comentario", rs.getString("comentario"));
+                obj.addProperty("fechaComentario", rs.getDate("fecha_comentario").toString());
+                array.add(obj);
+            }
+        }
+        return array.toString();
     }
 
 }

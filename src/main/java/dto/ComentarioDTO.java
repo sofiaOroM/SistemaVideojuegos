@@ -15,7 +15,7 @@ public class ComentarioDTO {
     private int idComentario;
     private int idUsuario;
     private int idVideojuego;
-    private int idComentarioPadre;
+    private Integer idComentarioPadre;
     private String comentario;
     private Date fechaComentario;
 
@@ -43,11 +43,11 @@ public class ComentarioDTO {
         this.idVideojuego = idVideojuego;
     }
 
-    public int getIdComentarioPadre() {
+        public Integer getIdComentarioPadre() {
         return idComentarioPadre;
     }
 
-    public void setIdComentarioPadre(int idComentarioPadre) {
+    public void setIdComentarioPadre(Integer idComentarioPadre) {
         this.idComentarioPadre = idComentarioPadre;
     }
 
