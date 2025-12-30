@@ -4,13 +4,15 @@
  */
 package controllers;
 
+import com.google.gson.Gson;
+import dto.ComentarioDTO;
 import java.io.IOException;
-import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.BufferedReader;
 import service.ComentarioService;
 
 /**
@@ -31,18 +33,58 @@ public class ComentarioServlet extends HttpServlet {
     }
 
     @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        setResponseHeaders(resp);
+
+        try {
+            BufferedReader reader = req.getReader();
+            Gson gson = new Gson();
+
+            ComentarioDTO comentario = gson.fromJson(reader, ComentarioDTO.class);
+
+            if (comentario.getIdUsuario() == 0 || comentario.getIdVideojuego() == 0) {
+                throw new Exception("Datos obligatorios incompletos");
+            }
+
+            comentarioService.crearComentario(comentario);
+
+            resp.getWriter().write("{\"message\":\"Comentario agregado\"}");
+
+        } catch (Exception e) {
+            resp.setStatus(400);
+            resp.getWriter().write("{\"error\":\"" + e.getMessage() + "\"}");
+        }
+    }
+
+    @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         setResponseHeaders(resp);
+
         try {
-            String path = req.getPathInfo(); // /{id}/estado
-            if (path == null || !path.endsWith("/estado")) {
+            String path = req.getPathInfo();
+            // /{idVideojuego}
+            // /{idVideojuego}/estado
+
+            if (path == null) {
                 throw new Exception("Ruta inválida");
             }
 
-            int idVideojuego = Integer.parseInt(path.split("/")[1]);
-            boolean activo = comentarioService.obtenerEstado(idVideojuego);
+            String[] parts = path.split("/");
 
-            resp.getWriter().write("{\"activo\":" + activo + "}");
+            int idVideojuego = Integer.parseInt(parts[1]);
+
+            //estado
+            if (parts.length == 3 && parts[2].equals("estado")) {
+                boolean activo = comentarioService.obtenerEstado(idVideojuego);
+                resp.getWriter().write("{\"activo\":" + activo + "}");
+                return;
+            }
+
+            //listar comentarios
+            resp.getWriter().write(
+                    comentarioService.listarPorVideojuego(idVideojuego)
+            );
+
         } catch (Exception e) {
             resp.setStatus(400);
             resp.getWriter().write("{\"error\":\"" + e.getMessage() + "\"}");
