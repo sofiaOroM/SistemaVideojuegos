@@ -5,6 +5,7 @@
 package Reportes.service;
 
 import Reportes.dto.ReporteGananciasGlobalDTO;
+import Reportes.dto.ReporteIngresosEmpresaDTO;
 import Reportes.model.ReportesAdminModel;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,5 +24,8 @@ public class ReportesAdminService {
         lista.add(AdminModel.obtenerGananciasGlobales());
         System.out.println("lista:"+ lista);
         return lista;
+    }
+    public List<ReporteIngresosEmpresaDTO> generarReporteIngresosEmpresa() throws Exception {
+        return AdminModel.obtenerIngresosPorEmpresa();
     }
 }

@@ -5,10 +5,13 @@
 package Reportes.model;
 
 import Reportes.dto.ReporteGananciasGlobalDTO;
+import Reportes.dto.ReporteIngresosEmpresaDTO;
 import com.videojuegosbackend.conexionDB.ConnectionManager;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -38,5 +41,41 @@ public class ReportesAdminModel {
         conn.close();
         System.out.println(dto);
         return dto;
+    }
+
+    public List<ReporteIngresosEmpresaDTO> obtenerIngresosPorEmpresa() throws Exception {
+
+        String sql = "SELECT e.id_empresa, "
+                + "e.nombre_empresa AS nombre_empresa, "
+                + "ROUND(SUM(c.precio_pagado),2) AS total_ventas, "
+                + "ROUND(SUM(c.precio_pagado * (cc.porcentaje_usado / 100)),2) AS comision_plataforma, "
+                + "ROUND(SUM(c.precio_pagado * (1 - cc.porcentaje_usado / 100)),2) AS ingreso_empresa "
+                + "FROM empresa e "
+                + "JOIN videojuego v ON v.id_empresa = e.id_empresa "
+                + "JOIN compras c ON c.id_videojuego = v.id_videojuego "
+                + "JOIN compra_comision cc ON cc.id_compra = c.id_compra "
+                + "GROUP BY e.id_empresa, e.nombre_empresa "
+                + "ORDER BY total_ventas DESC";
+
+        List<ReporteIngresosEmpresaDTO> lista = new ArrayList<>();
+
+        Connection conn = new ConnectionManager().conectar();
+        PreparedStatement ps = conn.prepareStatement(sql);
+        ResultSet rs = ps.executeQuery();
+
+        while (rs.next()) {
+            ReporteIngresosEmpresaDTO dto = new ReporteIngresosEmpresaDTO();
+
+            dto.setIdEmpresa(rs.getInt("id_empresa"));
+            dto.setNombreEmpresa(rs.getString("nombre_empresa"));
+            dto.setTotalVentas(rs.getBigDecimal("total_ventas"));
+            dto.setComisionPlataforma(rs.getBigDecimal("comision_plataforma"));
+            dto.setIngresoEmpresa(rs.getBigDecimal("ingreso_empresa"));
+
+            lista.add(dto);
+        }
+
+        conn.close();
+        return lista;
     }
 }
