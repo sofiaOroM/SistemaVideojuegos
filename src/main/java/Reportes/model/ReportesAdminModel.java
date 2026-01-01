@@ -4,6 +4,7 @@
  */
 package Reportes.model;
 
+import Reportes.dto.RankingUsuarioDTO;
 import Reportes.dto.ReporteGananciasGlobalDTO;
 import Reportes.dto.ReporteIngresosEmpresaDTO;
 import com.videojuegosbackend.conexionDB.ConnectionManager;
@@ -72,6 +73,36 @@ public class ReportesAdminModel {
             dto.setComisionPlataforma(rs.getBigDecimal("comision_plataforma"));
             dto.setIngresoEmpresa(rs.getBigDecimal("ingreso_empresa"));
 
+            lista.add(dto);
+        }
+
+        conn.close();
+        return lista;
+    }
+
+    public List<RankingUsuarioDTO> obtenerRankingUsuario() throws Exception {
+
+        String sql = "SELECT u.correo_electronico AS correo, "
+                + "COUNT(DISTINCT c.id_compra) AS total_compras, "
+                + "COUNT(DISTINCT cm.id_comentario) AS total_resenas, "
+                + "(COUNT(DISTINCT c.id_compra) + COUNT(DISTINCT cm.id_comentario)) AS actividad_total "
+                + "FROM usuario u "
+                + "LEFT JOIN compras c ON c.id_usuario = u.id_usuario "
+                + "LEFT JOIN comentario cm ON cm.id_usuario = u.id_usuario "
+                + "WHERE u.rol = 'gamer' "
+                + "GROUP BY u.id_usuario, u.correo_electronico "
+                + "order by actividad_total DESC ";
+        List< RankingUsuarioDTO> lista = new ArrayList<>();
+        Connection conn = new ConnectionManager().conectar();
+        PreparedStatement ps = conn.prepareStatement(sql);
+        ResultSet rs = ps.executeQuery();
+
+        while (rs.next()) {
+            RankingUsuarioDTO dto = new RankingUsuarioDTO();
+            dto.setCorreoUsuario(rs.getString("correo"));
+            dto.setTotalCompras(rs.getInt("total_compras"));
+            dto.setTotalResenas(rs.getInt("total_resenas"));
+            dto.setActividadTotal(rs.getInt("actividad_total"));
             lista.add(dto);
         }
 
