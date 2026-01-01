@@ -38,12 +38,6 @@ public class ReporteRankingUsuarioServlet extends HttpServlet {
 
         try {
             List<RankingUsuarioDTO> ranking = service.generarReporteRankingUsuario();
-            
-            // asignar posiciones
-            int pos = 1;
-            for (RankingUsuarioDTO r : ranking) {
-                r.setPosicion(pos++);
-            }
 
             JRBeanCollectionDataSource ds
                     = new JRBeanCollectionDataSource(ranking);
@@ -65,7 +59,7 @@ public class ReporteRankingUsuarioServlet extends HttpServlet {
                     .getResourceAsStream(
                             "Reportes/Jasper/img/imagenAlternativa.png"
                     );
-            InputStream primerPosicion = getClass()
+            /*InputStream primerPosicion = getClass()
                     .getClassLoader()
                     .getResourceAsStream(
                             "Reportes/Jasper/img/primeraPosicion.png"
@@ -79,9 +73,9 @@ public class ReporteRankingUsuarioServlet extends HttpServlet {
                     .getClassLoader()
                     .getResourceAsStream(
                             "Reportes/Jasper/img/terceraPosicion.png"
-                    );
+                    );*/
 
-            if (reporte == null || logo == null || imgAlt == null || primerPosicion == null || segundaPosicion == null || terceraPosicion == null) {
+            if (reporte == null || logo == null || imgAlt == null /*|| primerPosicion == null || segundaPosicion == null || terceraPosicion == null*/) {
                 throw new RuntimeException("No se encontró algún recurso Jasper");
             }
 
@@ -89,9 +83,9 @@ public class ReporteRankingUsuarioServlet extends HttpServlet {
             params.put("ds", ds);
             params.put("logoEmpresa", logo);
             params.put("imagenAlternativa", imgAlt);
-            params.put("primerPosicion", primerPosicion);
+            /*params.put("primerPosicion", primerPosicion);
             params.put("segundaPosicion", segundaPosicion);
-            params.put("terceraPosicion", terceraPosicion);
+            params.put("terceraPosicion", terceraPosicion);*/
 
             JasperPrint jp = JasperFillManager.fillReport(
                     reporte,
