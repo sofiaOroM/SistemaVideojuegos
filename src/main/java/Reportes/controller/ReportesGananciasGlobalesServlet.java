@@ -26,67 +26,10 @@ import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
  * @author sofia
  *
  */
-/*@WebServlet("/api/reportes/admin/ganancias")
-public class ReportesAdminServlet extends HttpServlet {
-
-    private ReportesAdminService service = new ReportesAdminService();
-
-    //con este si genera el reporte pero no se muestra la tabla
-    @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
-            throws IOException {
-
-        try {
-            List<ReporteGananciasGlobalDTO> data = service.generarReporteGanancias();
-
-            JRBeanCollectionDataSource ds = new JRBeanCollectionDataSource(data);
-
-            InputStream reporte = getClass()
-                    .getClassLoader()
-                    .getResourceAsStream("/Reportes/Jasper/admin/ReporteGananciasGlobales.jasper");
-
-            InputStream logo = getClass()
-                    .getClassLoader()
-                    .getResourceAsStream("/Reportes/Jasper/img/logoEmpresa.png");
-
-            InputStream imgAlt = getClass()
-                    .getClassLoader()
-                    .getResourceAsStream("/Reportes/Jasper/img/imagenAlternativa.png");
-
-            if (reporte == null || logo == null || imgAlt == null) {
-                throw new RuntimeException("No se encontró algún recurso Jasper");
-            }
-
-            Map<String, Object> params = new HashMap<>();
-            params.put("logoEmpresa", logo);
-            params.put("imagenAlternativa", imgAlt);
-
-            JasperPrint jp = JasperFillManager.fillReport(
-                    reporte,
-                    params,
-                    ds
-            );
-
-            resp.setContentType("application/pdf");
-            resp.setHeader("Content-Disposition", "attachment; filename=ganancias_globales.pdf");
-
-            JasperExportManager.exportReportToPdfStream(jp, resp.getOutputStream());
-
-        } catch (Exception e) {
-            resp.reset();
-            resp.setStatus(500);
-            resp.setContentType("text/plain");
-            resp.getWriter().write("Error generando reporte: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-    
-}*/
-
 @WebServlet("/api/reportes/admin/ganancias")
-public class ReportesAdminServlet extends HttpServlet {
+public class ReportesGananciasGlobalesServlet extends HttpServlet {
 
-    private ReportesAdminService service = new ReportesAdminService();
+    private final ReportesAdminService service = new ReportesAdminService();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
