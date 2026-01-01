@@ -11,9 +11,9 @@ import java.math.BigDecimal;
  * @author sofia
  */
 public class ReporteIngresosEmpresaDTO {
-        private int idEmpresa;
-    private String nombreEmpresa;
 
+    private int idEmpresa;
+    private String nombreEmpresa;
     private BigDecimal totalVentas;
     private BigDecimal comisionPlataforma;
     private BigDecimal ingresoEmpresa;
